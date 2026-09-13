@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 
+//MARK: - StatsViewController
 
 final class StatsViewController: UIViewController {
     

@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+//MARK: - TrackerRecord
+
+struct TrackerRecord {
+    let trackerId: UInt
+    let date: [String]
+}

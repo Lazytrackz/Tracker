@@ -8,8 +8,15 @@
 import Foundation
 import UIKit
 
+//MARK: - CategoryCellHeader
+
 final class CategoryCellHeader: UICollectionReusableView {
+    
+    //MARK: - Properties
+    
     let titleLabel = UILabel()
+    
+    //MARK: - Init
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -17,7 +24,6 @@ final class CategoryCellHeader: UICollectionReusableView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
         addSubview(titleLabel)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -27,6 +33,4 @@ final class CategoryCellHeader: UICollectionReusableView {
             titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
-    
-   
 }

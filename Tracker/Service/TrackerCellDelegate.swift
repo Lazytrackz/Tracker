@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+//MARK: - TrackerCellDelegate
+
+protocol TrackerCellDelegate: AnyObject {
+    
+    //MARK: - Public methods
+    
+    func trackerCellCheckButtonDidTap(_ cell: TrackerCell, buttonStatus: Bool)
+}

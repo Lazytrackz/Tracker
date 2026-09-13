@@ -7,59 +7,52 @@
 
 import UIKit
 
-final class HabitViewController: UIViewController {
+//MARK: - HabitViewController
 
+final class HabitViewController: UIViewController {
+    
+    //MARK: - Static properties
     
     static let didChangeNotification = Notification.Name(rawValue: "HabitViewControllerDidChange")
+    
+    //MARK: - Private properties
     
     private let titleLabel: UILabel = UILabel()
     private var trackerNameTextField: UITextField = UITextField()
     private var trackerNameLabel: UILabel = UILabel()
     private var createTrackerButton: UIButton = UIButton()
-    
     private var cancelTrackerButton: UIButton = UIButton()
-    
     private var scheduleButton: UIButton = UIButton()
     private var scheduleButtonLabel: UILabel = UILabel()
     private var categoryButton: UIButton = UIButton()
     private var categoryButtonLabel: UILabel = UILabel()
-    
     private var stackView: UIStackView = UIStackView()
     private var trackerId: UInt = 0
     private var isScheduleCreated: Bool = false
     private var isTrackerNameCreated: Bool = false
-    
     private var categories: [TrackerCategory] = []
     private var trackers: [Tracker] = []
     private var scheduleArray = [WeekDays]()
-    
     private var scheduleViewController: TrackerScheduleView?
     
-
     
+    // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        trackerNameTextField.delegate = self
         configuredView()
-
     }
     
+    // MARK: - Actions
+    
     @objc private func didTapCreateButton() {
-        
         createTracker()
         clearData()
-        checkCreateButtonStatus() 
+        checkCreateButtonStatus()
         self.dismiss(animated: true, completion: nil)
-        
-        
-        
-        
     }
     
     @objc private func didTapCancelButton() {
-        
         clearData()
         self.dismiss(animated: true, completion: nil)
     }
@@ -69,24 +62,42 @@ final class HabitViewController: UIViewController {
     }
     
     @objc private func didTapScheduleButton() {
-        
         scheduleViewController = TrackerScheduleView()
         guard let scheduleViewController else { return }
         scheduleViewController.delegate = self
         present(scheduleViewController, animated: true, completion: nil)
-        
-        
     }
     
+    // MARK: - methods
+    
+    func getCategories() -> [TrackerCategory] {
+        categories
+    }
+    
+    
+    // MARK: - Private methods
+    
+    private func configuredView() {
+        configureTitle()
+        configureTrackerNameLabel()
+        configureTrackerNameTextField()
+        configureCreateTrackerButton()
+        configureCancelTrackerButton()
+        configureScheduleButton()
+        configureCategoryButton()
+        configureScheduleButtonLabel()
+        configureCategoryButtonLabel()
+        configureButtonsContainer()
+    }
+    
+    
     private func clearData() {
-        
         trackerNameTextField.text = ""
         isScheduleCreated = false
         isTrackerNameCreated = false
     }
     
     private func checkCreateButtonStatus() {
-        
         if isScheduleCreated && isTrackerNameCreated {
             createTrackerButton.backgroundColor = .ypBlackIOS
             createTrackerButton.isEnabled = true
@@ -94,21 +105,11 @@ final class HabitViewController: UIViewController {
             createTrackerButton.backgroundColor = .ypGrayIOS
             createTrackerButton.isEnabled = false
         }
-        
     }
     
-    
-    func getCategories() -> [TrackerCategory] {
-        categories
-    }
-    
-    
-    func createTracker() {
-        
-        
+    private func createTracker() {
         let trackerCategoryName = "Мои привычки"
         trackerId += 1
-        
         let trackerName = trackerNameTextField.text
         let trackerColor = UIColor.green
         let trackerEmoji = "🌶️"
@@ -117,41 +118,16 @@ final class HabitViewController: UIViewController {
         trackers.append(tracker)
         
         let trackerCategory = TrackerCategory(name: trackerCategoryName, trackers: trackers)
-        
         var tempArray = [TrackerCategory]()
         tempArray.append(trackerCategory)
         categories = tempArray
-        
         
         NotificationCenter.default
             .post(
                 name: HabitViewController.didChangeNotification,
                 object: self,
                 userInfo: ["Data": categories])
-        
-        
-
     }
-    
-    
-    private func configuredView() {
-        
-        configureTitle()
-        configureTrackerNameLabel()
-        configureTrackerNameTextField()
-        configureCreateTrackerButton()
-        configureCancelTrackerButton()
-        configureScheduleButton()
-        configureCategoryButton()
-        
-        configureScheduleButtonLabel()
-        configureCategoryButtonLabel()
-        
-        
-        configureButtonsContainer()
-    }
-    
-    
     
     private func configureScheduleButtonLabel() {
         
@@ -160,15 +136,13 @@ final class HabitViewController: UIViewController {
         scheduleButtonLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         scheduleButtonLabel.translatesAutoresizingMaskIntoConstraints = false
         scheduleButton.addSubview(scheduleButtonLabel)
-       
+        
         NSLayoutConstraint.activate([
             scheduleButtonLabel.topAnchor.constraint(equalTo: scheduleButton.topAnchor, constant: 27),
             scheduleButtonLabel.leadingAnchor.constraint(equalTo: scheduleButton.leadingAnchor, constant: 16),
             scheduleButtonLabel.bottomAnchor.constraint(equalTo: scheduleButton.bottomAnchor, constant: -26),
         ])
-        
     }
-    
     
     private func configureCategoryButtonLabel() {
         
@@ -177,31 +151,22 @@ final class HabitViewController: UIViewController {
         categoryButtonLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         categoryButtonLabel.translatesAutoresizingMaskIntoConstraints = false
         categoryButton.addSubview(categoryButtonLabel)
-       
+        
         NSLayoutConstraint.activate([
             categoryButtonLabel.topAnchor.constraint(equalTo: categoryButton.topAnchor, constant: 27),
             categoryButtonLabel.leadingAnchor.constraint(equalTo: categoryButton.leadingAnchor, constant: 16),
             categoryButtonLabel.bottomAnchor.constraint(equalTo: categoryButton.bottomAnchor, constant: -26),
         ])
-        
     }
     
-    
-    
-    
-    
-    
-    
-    
     private func configureTrackerNameLabel() {
-        
         trackerNameLabel.layer.cornerRadius = 16
         trackerNameLabel.layer.masksToBounds = true
         trackerNameLabel.backgroundColor = .ypBackgroundIOS
         trackerNameLabel.isUserInteractionEnabled = true
         trackerNameLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackerNameLabel)
-       
+        
         NSLayoutConstraint.activate([
             trackerNameLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
             trackerNameLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
@@ -211,46 +176,22 @@ final class HabitViewController: UIViewController {
     }
     
     private func configureTrackerNameTextField() {
-       
         trackerNameTextField.placeholder = "Введите название трекера"
         trackerNameTextField.isEnabled = true
         trackerNameTextField.isUserInteractionEnabled = true
         trackerNameTextField.translatesAutoresizingMaskIntoConstraints = false
         trackerNameTextField.resignFirstResponder()
+        trackerNameTextField.delegate = self
         trackerNameLabel.addSubview(trackerNameTextField)
-       
+        
         NSLayoutConstraint.activate([
             trackerNameTextField.topAnchor.constraint(equalTo: trackerNameLabel.topAnchor, constant: 27),
             trackerNameTextField.bottomAnchor.constraint(equalTo: trackerNameLabel.bottomAnchor, constant: -26),
             trackerNameTextField.leadingAnchor.constraint(equalTo: trackerNameLabel.leadingAnchor, constant: 16),
         ])
     }
-        
-        
-    
-    
-    
-    
-    
-    /*private func configureSeparator() {
-        
-        let image = UIImage(named: "BottomDivider")
-        let separator = UIImageView()
-        separator.image = image
-        separator.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(separator)
-        
-        NSLayoutConstraint.activate([
-            separator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            separator.centerYAnchor.constraint(equalTo: stackView.centerYAnchor),
-            separator.heightAnchor.constraint(equalToConstant: 1),
-            separator.widthAnchor.constraint(equalToConstant: 341),
-            
-        ])
-    }*/
     
     private func configureButtonIcon(_ button: UIButton) {
-        
         let buttonIcon = UIImage(named: "ButtonIcon")
         let buttonImageView = UIImageView()
         buttonImageView.image = buttonIcon
@@ -264,7 +205,6 @@ final class HabitViewController: UIViewController {
     }
     
     private func configureButtonsContainer() {
-        
         stackView = UIStackView(arrangedSubviews: [categoryButton, scheduleButton])
         stackView.axis = .vertical
         stackView.distribution = .fillEqually
@@ -274,7 +214,6 @@ final class HabitViewController: UIViewController {
         stackView.alignment = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stackView)
-        //configureSeparator()
         
         NSLayoutConstraint.activate([
             stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
@@ -283,7 +222,6 @@ final class HabitViewController: UIViewController {
             stackView.heightAnchor.constraint(equalToConstant: 150),
             stackView.widthAnchor.constraint(equalToConstant: 343),
         ])
-        
     }
     
     private func configureScheduleButton() {
@@ -292,37 +230,28 @@ final class HabitViewController: UIViewController {
         configureButtonIcon(scheduleButton)
         scheduleButton.backgroundColor = .ypBackgroundIOS
         scheduleButton.setTitleColor(.ypBlackIOS, for: .normal)
-
         scheduleButton.addTarget(self, action: #selector(didTapScheduleButton), for: .touchUpInside)
         scheduleButton.translatesAutoresizingMaskIntoConstraints = false
     }
     
-
     private func configureCategoryButton() {
-        
         categoryButton = UIButton(type: .roundedRect)
         configureButtonIcon(categoryButton)
         categoryButton.backgroundColor = .ypBackgroundIOS
-        //categoryButton.setTitle("Категория", for: .normal)
         categoryButton.setTitleColor(.ypBlackIOS, for: .normal)
-        //categoryButton.contentHorizontalAlignment = .leading
         categoryButton.addTarget(self, action: #selector(didTapCategoryButton), for: .touchUpInside)
         categoryButton.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func configureCancelTrackerButton() {
-        
         cancelTrackerButton = UIButton(type: .roundedRect)
         cancelTrackerButton.backgroundColor = .ypWhiteIOS
         cancelTrackerButton.layer.borderColor = UIColor.ypRedIOS.cgColor
         cancelTrackerButton.layer.borderWidth = 1
         cancelTrackerButton.setTitle("Отменить", for: .normal)
         cancelTrackerButton.setTitleColor(.ypRedIOS, for: .normal)
-        
         cancelTrackerButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         cancelTrackerButton.titleLabel?.textColor = UIColor(named: "YP Red (iOS)")
-     
-        
         cancelTrackerButton.addTarget(self, action: #selector(didTapCancelButton), for: .touchUpInside)
         cancelTrackerButton.layer.cornerRadius = 16
         cancelTrackerButton.layer.masksToBounds = true
@@ -338,15 +267,12 @@ final class HabitViewController: UIViewController {
     }
     
     private func configureCreateTrackerButton() {
-        
         createTrackerButton = UIButton(type: .roundedRect)
         createTrackerButton.backgroundColor = .ypGrayIOS
         createTrackerButton.setTitle("Создать", for: .normal)
         createTrackerButton.setTitleColor(.white, for: .normal)
-        
         createTrackerButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         createTrackerButton.titleLabel?.textColor = UIColor(named: "YP White (iOS)")
-        
         createTrackerButton.addTarget(self, action: #selector(didTapCreateButton), for: .touchUpInside)
         createTrackerButton.layer.cornerRadius = 16
         createTrackerButton.layer.masksToBounds = true
@@ -362,15 +288,11 @@ final class HabitViewController: UIViewController {
         ])
     }
     
-    
-   
-    
     private func configureTitle() {
-        
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.textColor = UIColor(named: "YP Black (iOS)")
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        titleLabel.text = "Создание трекера"
+        titleLabel.text = "Новая привычка"
         view.addSubview(titleLabel)
         
         NSLayoutConstraint.activate([
@@ -381,8 +303,9 @@ final class HabitViewController: UIViewController {
     }
 }
 
+//MARK: - Extension
+
 extension HabitViewController: ScheduleViewDelegate {
-    
     func scheduleViewDoneButtonDidTap(scheduleArray: [WeekDays]) {
         self.scheduleArray = scheduleArray
         isScheduleCreated = true
@@ -391,7 +314,6 @@ extension HabitViewController: ScheduleViewDelegate {
 }
 
 extension HabitViewController: UITextFieldDelegate {
-    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         isTrackerNameCreated = true
@@ -399,22 +321,16 @@ extension HabitViewController: UITextFieldDelegate {
         return true
     }
     
-    
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        
         cancelTrackerButton.isEnabled = false
         scheduleButton.isEnabled = false
         categoryButton.isEnabled = false
         return true
     }
-
-      func textFieldDidEndEditing(_ textField: UITextField) {
-          cancelTrackerButton.isEnabled = true
-          scheduleButton.isEnabled = true
-          categoryButton.isEnabled = true
-         
-      }
     
-    
-    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        cancelTrackerButton.isEnabled = true
+        scheduleButton.isEnabled = true
+        categoryButton.isEnabled = true
+    }
 }

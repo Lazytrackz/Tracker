@@ -12,19 +12,13 @@ import UIKit
 
 final class TabBarController: UITabBarController {
     
-    // MARK: - Override methods
+    // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureTabBarAppearance()
         configureViewControllers()
-        
     }
-    
-   /* override func awakeFromNib() {
-        super.awakeFromNib()
-        configureViewControllers()
-    }*/
     
     // MARK: - Private methods
     
@@ -39,9 +33,7 @@ final class TabBarController: UITabBarController {
         tabBar.backgroundColor = .white
     }
     
-    
     private func configureViewControllers() {
-     
         let trackerViewController = TrackersViewController()
         let statsViewController = StatsViewController()
         
@@ -50,7 +42,6 @@ final class TabBarController: UITabBarController {
             image: UIImage(named: "Trackers"),
             selectedImage: nil
         )
-    
         statsViewController.tabBarItem = UITabBarItem(
             title: "Статистика",
             image: UIImage(named: "Stats"),
@@ -58,8 +49,6 @@ final class TabBarController: UITabBarController {
         )
         
         let navigationController = UINavigationController(rootViewController: trackerViewController)
-        
-        
         self.viewControllers = [navigationController, statsViewController]
     }
 }

@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+//MARK: - TrackerCellDelegate
+
+protocol ScheduleViewDelegate: AnyObject {
+    
+    //MARK: - Public methods
+    
+    func scheduleViewDoneButtonDidTap(scheduleArray: [WeekDays])
+}

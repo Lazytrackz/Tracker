@@ -7,8 +7,15 @@
 
 import UIKit
 
+//MARK: - TrackerCell
+
 final class TrackerCell: UICollectionViewCell {
     
+    //MARK: - Delegate
+    
+    weak var delegate: TrackerCellDelegate?
+    
+    //MARK: - Private properties
     
     private let rectangleLayer: CALayer = {
         let layer = CALayer()
@@ -24,35 +31,29 @@ final class TrackerCell: UICollectionViewCell {
     private var buttonStatus: Bool = false
     private var completedTrackersCount = 0
     private let trackersViewController = TrackersViewController()
-    
     private var currentDate: Date = Date()
     
-    weak var delegate: TrackerCellDelegate?
     
+    //MARK: - Init
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
         configureCell()
-        
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    //MARK: - Actions
     
     @objc private func didTapCheckButton() {
-        
         if currentDate <= Date() {
-            
-
             if buttonStatus {
                 checkButton.setImage(.buttonPlus, for: .normal)
                 self.completedTrackersCount -= 1
                 let countString = changeDaysCountEnding(countString: String(self.completedTrackersCount))
                 countLabel.text = "\(self.completedTrackersCount) \(countString)"//
-                
             } else {
                 checkButton.setImage(.buttonCheckmark, for: .normal)
                 self.completedTrackersCount += 1
@@ -60,16 +61,13 @@ final class TrackerCell: UICollectionViewCell {
                 countLabel.text = "\(self.completedTrackersCount) \(countString)"//
             }
             buttonStatus.toggle()
-            
             delegate?.trackerCellCheckButtonDidTap(self, buttonStatus: buttonStatus)
         }
-        
     }
     
+    //MARK: - Methods
     
     func setNewCell(name: String, emoji: String, color: UIColor, checkButtonStatus: Bool, completedTrackersCount: Int, currentDate: Date) {
-        
-     
         self.completedTrackersCount = completedTrackersCount
         let countString = changeDaysCountEnding(countString: String(self.completedTrackersCount))
         titleLabel.text = name
@@ -79,26 +77,19 @@ final class TrackerCell: UICollectionViewCell {
         countLabel.text = "\(self.completedTrackersCount) \(countString)"//
         buttonStatus = checkButtonStatus
         self.currentDate = currentDate
-        
         checkButton.setImage(UIImage(resource: buttonStatus == true ? .buttonCheckmark: .buttonPlus), for: .normal)
-        
-    
-        
     }
     
-    
+    //MARK: - Private methods
     
     private func changeDaysCountEnding(countString: String) -> String {
-        
         let number = Int(countString)
         guard let number else { return "0"}
         let lastTwoDigits = number % 100
         let lastDigit = number % 10
-        
         if lastTwoDigits >= 11 && lastTwoDigits <= 14 {
-                return "дней"
-            }
-        
+            return "дней"
+        }
         switch lastDigit {
         case _ where lastDigit == 1:
             return "дeнь"
@@ -107,31 +98,23 @@ final class TrackerCell: UICollectionViewCell {
         default:
             return "дней"
         }
-        
-        
-        
     }
     
     private func configureCell() {
-        contentView.backgroundColor = .none
         configureRectangleLabel()
         configureTitleLabel()
         configureEmojiLabel()
         configureFooterLabel()
         configureCheckButton()
         configureCountLabel()
-        
     }
     
     private func configureRectangleLabel() {
-        
         rectangleLayer.frame = CGRect(x: 0, y: 0, width: 167, height: 90)
         rectangleLabel.translatesAutoresizingMaskIntoConstraints = false
         rectangleLabel.layer.addSublayer(rectangleLayer)
         rectangleLabel.layer.cornerRadius = 16
         rectangleLabel.layer.masksToBounds = true
-        
-        
         contentView.addSubview(rectangleLabel)
         
         NSLayoutConstraint.activate([
@@ -145,7 +128,6 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     private func configureTitleLabel(){
-        
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.textColor = UIColor(named: "YP White (iOS)")
         titleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -161,7 +143,6 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     private func configureEmojiLabel() {
-        
         emojiImageView .translatesAutoresizingMaskIntoConstraints = false
         let color = UIColor.ypWhiteIOS.withAlphaComponent(0.3)
         emojiImageView.backgroundColor = color
@@ -177,9 +158,7 @@ final class TrackerCell: UICollectionViewCell {
         ])
     }
     
-    
     private func configureFooterLabel() {
-        
         footerLabel.translatesAutoresizingMaskIntoConstraints = false
         footerLabel.isUserInteractionEnabled = true
         addSubview(footerLabel)
@@ -191,20 +170,14 @@ final class TrackerCell: UICollectionViewCell {
             footerLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             footerLabel.heightAnchor.constraint(equalToConstant: 58),
             footerLabel.widthAnchor.constraint(equalToConstant: 167),
-            
         ])
-        
     }
     
-    
     private func configureCheckButton() {
-        
         checkButton = UIButton(type: .system)
         checkButton.addTarget(self, action: #selector(didTapCheckButton), for: .touchUpInside)
-        
         checkButton.accessibilityIdentifier = "CheckButton"
         checkButton.tintColor = .red
-        
         checkButton.translatesAutoresizingMaskIntoConstraints = false
         footerLabel.addSubview(checkButton)
         
@@ -214,34 +187,17 @@ final class TrackerCell: UICollectionViewCell {
             checkButton.heightAnchor.constraint(equalToConstant: 34),
             checkButton.widthAnchor.constraint(equalToConstant: 34),
         ])
-        
     }
     
-    
     private func configureCountLabel() {
-        
         countLabel.textColor = UIColor(named: "YP Black (iOS)")
         countLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         footerLabel.addSubview(countLabel)
         
-        
-        
         NSLayoutConstraint.activate([
             countLabel.leadingAnchor.constraint(equalTo: footerLabel.leadingAnchor, constant: 12),
             countLabel.centerYAnchor.constraint(equalTo: checkButton.centerYAnchor),
-            
         ])
-        
     }
-    
-    
-    
-    
-    
-    
-
-  
 }
-
-

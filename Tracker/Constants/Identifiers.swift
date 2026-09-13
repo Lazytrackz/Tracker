@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+//MARK: - IIdentifiers
+
+enum Identifiers {
+    static let trackerCellID = "categoryCell"
+    static let cellHeaderID = "categoryCellHeader"
+
+}
