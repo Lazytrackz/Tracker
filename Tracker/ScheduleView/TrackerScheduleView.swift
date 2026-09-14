@@ -138,7 +138,7 @@ final class TrackerScheduleView: UIViewController {
             scheduleSwitch.isEnabled = true
             scheduleSwitch.onTintColor = .ypBlueIOS
             scheduleSwitch.tag = i
-            scheduleSwitch.addTarget(stackView, action: #selector(switchValueChanged(_:)), for: .valueChanged)
+            scheduleSwitch.addTarget(self, action: #selector(switchValueChanged(_:)), for: .valueChanged)
             scheduleSwitch.translatesAutoresizingMaskIntoConstraints = false
             labelContainer.addSubview(scheduleSwitch)
             

@@ -27,7 +27,6 @@ final class TrackerCell: UICollectionViewCell {
     private let rectangleLabel = UILabel()
     private let titleLabel = UILabel()
     private let emojiLabel = UILabel()
-    private let emojiImageView = UIImageView()
     private var buttonStatus: Bool = false
     private var completedTrackersCount = 0
     private let trackersViewController = TrackersViewController()
@@ -110,7 +109,6 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     private func configureRectangleLabel() {
-        rectangleLayer.frame = CGRect(x: 0, y: 0, width: 167, height: 90)
         rectangleLabel.translatesAutoresizingMaskIntoConstraints = false
         rectangleLabel.layer.addSublayer(rectangleLayer)
         rectangleLabel.layer.cornerRadius = 16
@@ -121,9 +119,7 @@ final class TrackerCell: UICollectionViewCell {
             rectangleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             rectangleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             rectangleLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
-            rectangleLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -58),
-            rectangleLabel.heightAnchor.constraint(equalToConstant: 148),
-            rectangleLabel.widthAnchor.constraint(equalToConstant: 167),
+            rectangleLabel.heightAnchor.constraint(equalToConstant: 167),
         ])
     }
     
@@ -143,18 +139,19 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     private func configureEmojiLabel() {
-        emojiImageView .translatesAutoresizingMaskIntoConstraints = false
-        let color = UIColor.ypWhiteIOS.withAlphaComponent(0.3)
-        emojiImageView.backgroundColor = color
-        emojiImageView.frame.size = CGSize(width: 24, height: 24)
-        emojiImageView.layer.cornerRadius = 10
-        let image = UIImage(named: "EmojiIcon")
-        emojiImageView.image = image
-        rectangleLabel.addSubview(emojiImageView)
+        emojiLabel.layer.cornerRadius = 12
+        emojiLabel.layer.masksToBounds = true
+        emojiLabel.backgroundColor = .ypEmojiLabelColorIOS
+        emojiLabel.textAlignment = .center
+        emojiLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
+        rectangleLabel.addSubview(emojiLabel)
         
         NSLayoutConstraint.activate([
-            emojiImageView.leadingAnchor.constraint(equalTo: rectangleLabel.leadingAnchor, constant: 12),
-            emojiImageView.topAnchor.constraint(equalTo: rectangleLabel.topAnchor, constant: 12)
+            emojiLabel.leadingAnchor.constraint(equalTo: rectangleLabel.leadingAnchor, constant: 12),
+            emojiLabel.topAnchor.constraint(equalTo: rectangleLabel.topAnchor, constant: 12),
+            emojiLabel.heightAnchor.constraint(equalToConstant: 24),
+            emojiLabel.widthAnchor.constraint(equalToConstant: 24)
         ])
     }
     
