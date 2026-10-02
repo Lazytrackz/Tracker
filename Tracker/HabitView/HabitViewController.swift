@@ -111,8 +111,8 @@ final class HabitViewController: UIViewController {
         let trackerCategoryName = "Мои привычки"
         trackerId += 1
         let trackerName = trackerNameTextField.text
-        let trackerColor = UIColor.green
-        let trackerEmoji = "🌶️"
+        let trackerColor = UIColor.systemGreen
+        let trackerEmoji = "😊"
         let tracker = Tracker(id: trackerId, name: trackerName, color: trackerColor, emoji: trackerEmoji, schedule: scheduleArray)
         
         trackers.append(tracker)

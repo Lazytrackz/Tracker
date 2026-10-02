@@ -27,6 +27,8 @@ final class TrackersViewController: UIViewController {
     private var collectionViewIsVisibility = false
     private var idSet = Set<UInt>()
     private var trackersHabitViewObserver: NSObjectProtocol?
+    private var currentDate: Date = Date()
+    
     private lazy var weekDaysdateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
@@ -52,6 +54,7 @@ final class TrackersViewController: UIViewController {
     //MARK: - Actions
     
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
+        currentDate = sender.date
         addTrackers()
     }
     
@@ -84,9 +87,8 @@ final class TrackersViewController: UIViewController {
         }
     }
     
-    private func getRecordsData() -> String {
-        let currentDate = datePicker.date
-        return recordsDateFormatter.string(from: currentDate)
+    private func getRecordsData(date: Date) -> String {
+        return recordsDateFormatter.string(from: date)
     }
     
     private func addTrackers() {
@@ -95,8 +97,7 @@ final class TrackersViewController: UIViewController {
         guard let categories = habitViewController?.getCategories() else { return}
         self.categories = categories
         guard categories.count != 0 else { return }
-        let date = datePicker.date
-        let currentDateString: String = weekDaysdateFormatter.string(from: date).capitalized
+        let currentDateString: String = weekDaysdateFormatter.string(from: currentDate).capitalized
         
         var tempCategoryArray = [TrackerCategory]()
         var tempTrackerArray = [Tracker]()
@@ -138,7 +139,7 @@ final class TrackersViewController: UIViewController {
                 queue: .main
             ) { [weak self] _ in
                 guard let self = self else { return }
-                addTrackers()//
+                addTrackers()
             }
     }
     
@@ -149,26 +150,23 @@ final class TrackersViewController: UIViewController {
         let trackerId = categories[indexPath.section].trackers[indexPath.row].id
         var checkButtonStatus = false
         var completedTrackersCount = 0
-        let currentDate = getRecordsData()
-        
+   
         if idSet.contains(trackerId) {
-            if completedTrackers.count > 0{
+            if !completedTrackers.isEmpty{
+                
                 for tracker in completedTrackers {
                     if tracker.trackerId == trackerId {
-                        completedTrackersCount = tracker.date.count
-                        
-                        if tracker.date.contains(currentDate) {
+                        completedTrackersCount += 1
+                        if getRecordsData(date: currentDate) == getRecordsData(date: tracker.date) {
                             checkButtonStatus = true
                         }
                     }
                 }
             }
-        } else {
-            idSet.insert(trackerId)
         }
         
         cell.delegate = self
-        cell.setNewCell(name: name ?? "", emoji: emoji, color: color, checkButtonStatus: checkButtonStatus, completedTrackersCount: completedTrackersCount, currentDate: datePicker.date)
+        cell.setNewCell(name: name ?? "", emoji: emoji, color: color, checkButtonStatus: checkButtonStatus, completedTrackersCount: completedTrackersCount, currentDate: self.currentDate)
     }
     
     private func configureCollectionView() {
@@ -217,6 +215,9 @@ final class TrackersViewController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         datePicker.translatesAutoresizingMaskIntoConstraints = false
+        currentDate = datePicker.date
+        
+  
     }
     
     private func configureAddTrackerButton() {
@@ -343,43 +344,25 @@ extension TrackersViewController: TrackerCellDelegate {
     func trackerCellCheckButtonDidTap(_ cell: TrackerCell, buttonStatus: Bool) {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
         let trackerId = categories[indexPath.section].trackers[indexPath.row].id
-        let currentDate = getRecordsData()
-        var tempCompletedTrackersArray = [TrackerRecord]()
-        var tempCompletedTrackersDateArray = [String]()
-        
+        var countTrackers = 0
+
         if buttonStatus {
-            tempCompletedTrackersDateArray.append(currentDate)
-            if completedTrackers.isEmpty {
-                let newTrackerRecord = TrackerRecord(trackerId: trackerId, date: tempCompletedTrackersDateArray)
-                tempCompletedTrackersArray.append(newTrackerRecord)
-            }else {
-                for tracker in completedTrackers {
-                    if tracker.trackerId == trackerId {
-                        tempCompletedTrackersDateArray.append(contentsOf: tracker.date)
-                        let exitingTrackerRecord = TrackerRecord(trackerId: trackerId, date: tempCompletedTrackersDateArray)
-                        tempCompletedTrackersArray.append(exitingTrackerRecord)
-                    }else {
-                        tempCompletedTrackersArray.append(tracker)
+            let newTrackerRecord = TrackerRecord(trackerId: trackerId, date: currentDate)
+            completedTrackers.append(newTrackerRecord)
+            idSet.insert(trackerId)
+            
+        } else {
+            for index in (0 ..< completedTrackers .count).reversed() {
+                if completedTrackers[index].trackerId == trackerId {
+                    countTrackers += 1
+                    if getRecordsData(date: completedTrackers[index].date) == getRecordsData(date: currentDate){
+                        completedTrackers.remove(at: index)
                     }
                 }
-                
-                let newTrackerRecord = TrackerRecord(trackerId: trackerId, date: [currentDate])
-                if !tempCompletedTrackersArray.contains(where: { $0.trackerId == newTrackerRecord.trackerId} ) {
-                    tempCompletedTrackersArray.append(newTrackerRecord)
-                }
             }
-        }else {
-            for tracker in completedTrackers {
-                if tracker.trackerId == trackerId && tracker.date.count > 1 {
-                    tempCompletedTrackersDateArray = tracker.date.filter({$0 != currentDate})
-                    let newTrackerRecord = TrackerRecord(trackerId: trackerId, date: tempCompletedTrackersDateArray)
-                    tempCompletedTrackersArray.append(newTrackerRecord)
-                }
-                else if tracker.trackerId != trackerId {
-                    tempCompletedTrackersArray.append(tracker)
-                }
+            if countTrackers == 1 {
+                idSet.remove(trackerId)
             }
         }
-        completedTrackers = tempCompletedTrackersArray
     }
 }
