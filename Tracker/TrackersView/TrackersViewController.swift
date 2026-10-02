@@ -13,6 +13,8 @@ final class TrackersViewController: UIViewController {
     
     //MARK: - Private properties
     
+    private var trackerCategoryStore = TrackerCategoryStore()
+    private var trackerRecordStore = TrackerRecordStore()
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private var categories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
@@ -28,6 +30,8 @@ final class TrackersViewController: UIViewController {
     private var idSet = Set<UInt>()
     private var trackersHabitViewObserver: NSObjectProtocol?
     private var currentDate: Date = Date()
+    
+    //MARK: - Lazy properties
     
     private lazy var weekDaysdateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -47,8 +51,9 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         habitViewController = HabitViewController()
+        trackerCategoryStore.delegate = self
         configureView()
-        observeTrackerCategory()
+        addTrackers()
     }
     
     //MARK: - Actions
@@ -92,35 +97,19 @@ final class TrackersViewController: UIViewController {
     }
     
     private func addTrackers() {
-        
         changeCollectionViewVisibility()
-        guard let categories = habitViewController?.getCategories() else { return}
-        self.categories = categories
-        guard categories.count != 0 else { return }
         let currentDateString: String = weekDaysdateFormatter.string(from: currentDate).capitalized
-        
-        var tempCategoryArray = [TrackerCategory]()
-        var tempTrackerArray = [Tracker]()
-        var trackersCount = 0
-        
-        categories.forEach { category in
-            let categoryName = category.name
-            category.trackers.forEach { tracker in
-                if tracker.schedule.contains(where: { $0.rawValue == currentDateString}) {
-                    tempTrackerArray.append(tracker)
-                    trackersCount += 1
-                }
-            }
-            let newCategory = TrackerCategory(name: categoryName, trackers: tempTrackerArray)
-            tempCategoryArray.append(newCategory)
+        categories = trackerCategoryStore.getCategoryArray(currentDate: currentDateString)
+        guard !categories.isEmpty else { return }
+        var isTrackerFound = false
+        if categories.contains(where: {$0.trackers.count > 0}) {
+            isTrackerFound = true
         }
-        
-        self.categories = tempCategoryArray
-        updateCollectionView(trackersCount: trackersCount)
+        updateCollectionView(isTrackerFound)
     }
     
-    private func updateCollectionView(trackersCount: Int) {
-        if trackersCount > 0 {
+    private func updateCollectionView(_ isTrackerFound: Bool) {
+        if isTrackerFound {
             collectionViewIsVisibility = true
             changeCollectionViewVisibility()
             collectionView.reloadData()
@@ -130,19 +119,6 @@ final class TrackersViewController: UIViewController {
         }
     }
     
-    
-    private func observeTrackerCategory() {
-        trackersHabitViewObserver = NotificationCenter.default
-            .addObserver(
-                forName: HabitViewController.didChangeNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                addTrackers()
-            }
-    }
-    
     private func configureTrackerCell(for cell: TrackerCell, with indexPath: IndexPath) {
         let name = categories[indexPath.section].trackers[indexPath.row].name
         let color = categories[indexPath.section].trackers[indexPath.row].color
@@ -150,21 +126,18 @@ final class TrackersViewController: UIViewController {
         let trackerId = categories[indexPath.section].trackers[indexPath.row].id
         var checkButtonStatus = false
         var completedTrackersCount = 0
-   
-        if idSet.contains(trackerId) {
-            if !completedTrackers.isEmpty{
-                
-                for tracker in completedTrackers {
-                    if tracker.trackerId == trackerId {
-                        completedTrackersCount += 1
-                        if getRecordsData(date: currentDate) == getRecordsData(date: tracker.date) {
-                            checkButtonStatus = true
-                        }
+        completedTrackers = trackerRecordStore.getRecordsArray()
+        
+        if !completedTrackers.isEmpty{
+            for tracker in completedTrackers {
+                if tracker.trackerId == trackerId {
+                    completedTrackersCount += 1
+                    if getRecordsData(date: currentDate) == getRecordsData(date: tracker.date) {
+                        checkButtonStatus = true
                     }
                 }
             }
         }
-        
         cell.delegate = self
         cell.setNewCell(name: name ?? "", emoji: emoji, color: color, checkButtonStatus: checkButtonStatus, completedTrackersCount: completedTrackersCount, currentDate: self.currentDate)
     }
@@ -174,9 +147,7 @@ final class TrackersViewController: UIViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .ypWhiteIOS
         self.view.addSubview(collectionView)
-        
         collectionView.register(TrackerCell.self, forCellWithReuseIdentifier: Identifiers.trackerCellID)
-        
         collectionView.register(CategoryCellHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: Identifiers.cellHeaderID)
         
         NSLayoutConstraint.activate([
@@ -188,7 +159,6 @@ final class TrackersViewController: UIViewController {
         
         collectionView.delegate = self
         collectionView.dataSource = self
-        addTrackers()
     }
     
     private func configureSearchBar() {
@@ -199,7 +169,6 @@ final class TrackersViewController: UIViewController {
         searchBar.setBackgroundImage(UIImage(), for: .any, barMetrics: .default)
         searchBar.searchTextField.backgroundColor = .ypSearchBarColorIOS
         view.addSubview(searchBar)
-        
         searchBar.delegate = self
         
         NSLayoutConstraint.activate([
@@ -216,8 +185,6 @@ final class TrackersViewController: UIViewController {
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         currentDate = datePicker.date
-        
-  
     }
     
     private func configureAddTrackerButton() {
@@ -226,7 +193,6 @@ final class TrackersViewController: UIViewController {
     }
     
     private func configureEmptyTrackerLabel() {
-        
         emptyTrackerLabel.translatesAutoresizingMaskIntoConstraints = false
         emptyTrackerLabel.text = "Что будем отслеживать?"
         emptyTrackerLabel.textColor = UIColor(named: "YP Black (iOS)")
@@ -287,7 +253,6 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Identifiers.trackerCellID, for: indexPath) as? TrackerCell
         
         guard let cell else {
@@ -304,7 +269,6 @@ extension TrackersViewController: UICollectionViewDelegate {
         return categories.count
     }
 }
-
 
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
@@ -330,9 +294,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 
 extension TrackersViewController: UISearchBarDelegate {
     
-    func searchBar(_ searchBar: UISearchBar, searchedTextDidChange searchText: String) {
-        
-    }
+    func searchBar(_ searchBar: UISearchBar, searchedTextDidChange searchText: String) {}
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
@@ -344,25 +306,27 @@ extension TrackersViewController: TrackerCellDelegate {
     func trackerCellCheckButtonDidTap(_ cell: TrackerCell, buttonStatus: Bool) {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
         let trackerId = categories[indexPath.section].trackers[indexPath.row].id
-        var countTrackers = 0
-
+        let newTrackerRecord = TrackerRecord(trackerId: trackerId, date: currentDate)
+        
         if buttonStatus {
-            let newTrackerRecord = TrackerRecord(trackerId: trackerId, date: currentDate)
-            completedTrackers.append(newTrackerRecord)
-            idSet.insert(trackerId)
-            
-        } else {
-            for index in (0 ..< completedTrackers .count).reversed() {
-                if completedTrackers[index].trackerId == trackerId {
-                    countTrackers += 1
-                    if getRecordsData(date: completedTrackers[index].date) == getRecordsData(date: currentDate){
-                        completedTrackers.remove(at: index)
-                    }
-                }
+            do{
+                try trackerRecordStore.addData(newTrackerRecord)
+            }catch {
+                print(error)
             }
-            if countTrackers == 1 {
-                idSet.remove(trackerId)
+        } else {
+            
+            do{
+                try trackerRecordStore.deleteData(newTrackerRecord)
+            }catch {
+                print(error)
             }
         }
+    }
+}
+
+extension TrackersViewController: TrackerCategoryStoreDelegate {
+    func didUpdate() {
+        addTrackers()
     }
 }

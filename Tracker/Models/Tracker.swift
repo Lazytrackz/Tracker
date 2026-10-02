@@ -10,7 +10,7 @@ import UIKit
 
 //MARK: - TrackerModel
 
-enum WeekDays: String {
+enum WeekDays: String, Codable {
     case sunday = "Воскресенье"
     case monday = "Понедельник"
     case tuesday = "Вторник"

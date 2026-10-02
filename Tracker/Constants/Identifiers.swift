@@ -12,5 +12,7 @@ import Foundation
 enum Identifiers {
     static let trackerCellID = "categoryCell"
     static let cellHeaderID = "categoryCellHeader"
+    static let emojiCellID = "emojiCell"
+    static let colorCellID = "colorCell"
 
 }
