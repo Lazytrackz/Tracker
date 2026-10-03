@@ -14,7 +14,4 @@ enum Identifiers {
     static let cellHeaderID = "categoryCellHeader"
     static let emojiCellID = "emojiCell"
     static let colorCellID = "colorCell"
-    
-   
-
 }
