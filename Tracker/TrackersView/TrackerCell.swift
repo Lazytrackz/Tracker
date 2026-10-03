@@ -40,8 +40,9 @@ final class TrackerCell: UICollectionViewCell {
         configureCell()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     //MARK: - Actions

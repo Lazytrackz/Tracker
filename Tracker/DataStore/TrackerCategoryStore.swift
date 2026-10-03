@@ -5,7 +5,6 @@
 //  Created by Aleksey Kosichenko on 23.09.2026.
 //
 
-import Foundation
 import CoreData
 import UIKit
 
@@ -19,19 +18,11 @@ final class TrackerCategoryStore: NSObject {
     
     //MARK: - Private properties
     
-    private let context: NSManagedObjectContext
     private var trackerStore = TrackerStore()
     
-    //MARK: - Init
+    //MARK: - Singletone
     
-    convenience override init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context)
-    }
-    
-    init(context: NSManagedObjectContext) {
-        self.context = context
-    }
+    private let context = DataBaseStore.shared.persistentContainer.viewContext
     
     //MARK: - Lazy properties
     
@@ -65,7 +56,12 @@ final class TrackerCategoryStore: NSObject {
                 let scheduleSet = tracker.value(forKey: "schedule") as? Array<WeekDays> ?? []
                 for days in scheduleSet {
                     if days.rawValue == currentDate {
-                        let tracker = Tracker(id: UInt(tracker.id), name: tracker.name, color: tracker.color as! UIColor, emoji: tracker.emoji ?? "", schedule: tracker.schedule as! [WeekDays])
+                        
+                        guard let color = tracker.color as? UIColor,
+                              let schedule = tracker.schedule as? [WeekDays],
+                              let emoji = tracker.emoji else {return []}
+    
+                        let tracker = Tracker(id: UInt(tracker.id), name: tracker.name, color: color, emoji: emoji, schedule: schedule)
                         trackerArray.append(tracker)
                     }
                 }
@@ -79,11 +75,7 @@ final class TrackerCategoryStore: NSObject {
     
     func updateData(_ trackerCategoryName: String, _ tracker: Tracker) throws {
         guard let trackerCategoryCoreData = checkExistingCategory(trackerCategoryName) else { return }
-        do {
-            try context.save()
-        } catch {
-            print(error)
-        }
+        DataBaseStore.shared.saveContext()
         try trackerStore.updateData(tracker, trackerCategoryCoreData)
     }
     
@@ -95,7 +87,8 @@ final class TrackerCategoryStore: NSObject {
         fetchRequest.returnsObjectsAsFaults = false
         let predicate = NSPredicate(format: "%K== %@", #keyPath(TrackerCategoryCoreData.name), trackerCategoryName)
         fetchRequest.predicate = predicate
-        let results = try! context.fetch(fetchRequest)
+        let results = try? context.fetch(fetchRequest)
+        guard let results else { return nil }
         
         if !results.isEmpty {
             guard let result = results.first else { return TrackerCategoryCoreData(context: context) }
@@ -104,7 +97,6 @@ final class TrackerCategoryStore: NSObject {
             trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
             trackerCategoryCoreData?.name = trackerCategoryName
         }
-        
         guard let trackerCategoryCoreData else { return nil }
         return trackerCategoryCoreData
     }

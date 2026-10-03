@@ -5,7 +5,6 @@
 //  Created by Aleksey Kosichenko on 15.09.2026.
 //
 
-import Foundation
 import UIKit
 
 //MARK: - EmojiCollectionCell
@@ -23,8 +22,9 @@ final class EmojiCollectionCell: UICollectionViewCell {
         configureCell()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     //MARK: - Methods

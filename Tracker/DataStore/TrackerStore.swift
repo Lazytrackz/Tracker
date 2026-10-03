@@ -5,7 +5,6 @@
 //  Created by Aleksey Kosichenko on 23.09.2026.
 //
 
-import Foundation
 import CoreData
 import UIKit
 
@@ -13,20 +12,9 @@ import UIKit
 
 final class TrackerStore {
     
-    //MARK: - Private properties
+    //MARK: - Singletone
     
-    private let context: NSManagedObjectContext
-    
-    //MARK: - Init
-    
-    convenience init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context)
-    }
-    
-    init(context: NSManagedObjectContext) {
-        self.context = context
-    }
+    private let context = DataBaseStore.shared.persistentContainer.viewContext
     
     //MARK: - Methods
     
@@ -39,12 +27,7 @@ final class TrackerStore {
         trackerCoreData.emoji = tracker.emoji
         trackerCoreData.schedule = tracker.schedule as NSObject
         trackerCoreData.addToCategory(category)
-        
-        do {
-            try context.save()
-        } catch {
-            print(error)
-        }
+        DataBaseStore.shared.saveContext()
     }
     
     //MARK: - Private methods

@@ -5,7 +5,6 @@
 //  Created by Aleksey Kosichenko on 16.09.2026.
 //
 
-import Foundation
 import UIKit
 
 //MARK: - ColorCollectionCell
@@ -24,8 +23,9 @@ final class ColorCollectionCell: UICollectionViewCell {
         configureCell()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     //MARK: - Methods

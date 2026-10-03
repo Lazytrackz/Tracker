@@ -5,7 +5,6 @@
 //  Created by Aleksey Kosichenko on 01.09.2026.
 //
 
-import Foundation
 import UIKit
 
 //MARK: - TrackerModel

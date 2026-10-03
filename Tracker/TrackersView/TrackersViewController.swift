@@ -93,7 +93,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func getRecordsData(date: Date) -> String {
-        return recordsDateFormatter.string(from: date)
+        recordsDateFormatter.string(from: date)
     }
     
     private func addTrackers() {

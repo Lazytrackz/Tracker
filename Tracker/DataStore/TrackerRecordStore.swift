@@ -5,7 +5,6 @@
 //  Created by Aleksey Kosichenko on 23.09.2026.
 //
 
-import Foundation
 import CoreData
 import UIKit
 
@@ -13,20 +12,9 @@ import UIKit
 
 final class TrackerRecordStore {
     
-    //MARK: - Private properties
+    //MARK: - Singletone
     
-    private let context: NSManagedObjectContext
-    
-    //MARK: - Init
-    
-    convenience init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context)
-    }
-    
-    init(context: NSManagedObjectContext) {
-        self.context = context
-    }
+    private let context = DataBaseStore.shared.persistentContainer.viewContext
     
     //MARK: - Lazy properties
     
@@ -69,11 +57,7 @@ final class TrackerRecordStore {
                 break
             }
         }
-        do {
-            try context.save()
-        } catch {
-            print(error)
-        }
+        DataBaseStore.shared.saveContext()
     }
     
     func addData(_ trackerRecord: TrackerRecord) throws {
@@ -81,18 +65,13 @@ final class TrackerRecordStore {
         guard let tracker = checkExistingTracker(trackerRecord.trackerId) else { return }
         trackerRecordCoreData.date = trackerRecord.date
         trackerRecordCoreData.addToTracker(tracker)
-        
-        do {
-            try context.save()
-        } catch {
-            print(error)
-        }
+        DataBaseStore.shared.saveContext()
     }
     
     //MARK: - Private methods
     
     private func getRecordsData(date: Date) -> String {
-        return recordsDateFormatter.string(from: date)
+        recordsDateFormatter.string(from: date)
     }
     
     private func checkExistingTracker(_ trackerId: UInt) -> TrackerCoreData? {
@@ -101,7 +80,8 @@ final class TrackerRecordStore {
         fetchRequest.returnsObjectsAsFaults = false
         let predicate = NSPredicate(format: "id == %@", String(trackerId))
         fetchRequest.predicate = predicate
-        let results = try! context.fetch(fetchRequest)
+        let results = try? context.fetch(fetchRequest)
+        guard let results else { return nil }
         
         if !results.isEmpty {
             trackerCoreData = results.first

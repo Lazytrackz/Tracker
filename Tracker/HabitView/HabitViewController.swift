@@ -15,7 +15,7 @@ final class HabitViewController: UIViewController {
     
     //MARK: - Static properties
     
-    static let didChangeNotification = Notification.Name(rawValue: "HabitViewControllerDidChange")
+    static let didChangeNotification = Notification.Name("HabitViewControllerDidChange")
     
     //MARK: - Private properties
     
@@ -42,7 +42,7 @@ final class HabitViewController: UIViewController {
     private var trackerEmoji = String()
     private var trackerColor = UIColor()
     private var emojiTitleLabel = UILabel()
-    private var emojiCollection = ["🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"]
+    private var emojiCollection = Smiles.smilesCollection
     private let emojiCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private var colorTitleLabel = UILabel()
     private var colorCollection = [UIColor.colorSelection1, UIColor.colorSelection2, UIColor.colorSelection3, UIColor.colorSelection4, UIColor.colorSelection5, UIColor.colorSelection6, UIColor.colorSelection7, UIColor.colorSelection8, UIColor.colorSelection9, UIColor.colorSelection10, UIColor.colorSelection11, UIColor.colorSelection12, UIColor.colorSelection13, UIColor.colorSelection14, UIColor.colorSelection15, UIColor.colorSelection16, UIColor.colorSelection17, UIColor.colorSelection18]
@@ -149,7 +149,6 @@ final class HabitViewController: UIViewController {
     }
     
     private func configureColorCollectionView() {
-        
         colorCollectionView.allowsMultipleSelection = false
         colorCollectionView.translatesAutoresizingMaskIntoConstraints = false
         colorCollectionView.backgroundColor = .ypWhiteIOS
@@ -175,7 +174,6 @@ final class HabitViewController: UIViewController {
     }
     
     private func configureEmojiCell(cell: EmojiCollectionCell, indexPath: IndexPath) {
-        
         let emoji = emojiCollection[indexPath.row]
         cell.setNewCell(emoji: emoji)
     }
@@ -224,13 +222,11 @@ final class HabitViewController: UIViewController {
     }
     
     private func checkCreateButtonStatus() {
-        if isScheduleCreated && isTrackerNameCreated && isEmojiSelected && isColorSelected {
-            createTrackerButton.backgroundColor = .ypBlackIOS
-            createTrackerButton.isEnabled = true
-        }else {
-            createTrackerButton.backgroundColor = .ypGrayIOS
-            createTrackerButton.isEnabled = false
-        }
+        let isEnabled: Bool = isScheduleCreated && isTrackerNameCreated && isEmojiSelected && isColorSelected
+           createTrackerButton.backgroundColor = isEnabled ? .ypBlackIOS : .ypGrayIOS
+           createTrackerButton.isEnabled = isEnabled
+        
+        
     }
     
     private func createTracker() {
@@ -453,12 +449,7 @@ extension HabitViewController: UITextFieldDelegate {
 extension HabitViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
-        if collectionView == emojiCollectionView {
-            return emojiCollection.count
-        }else {
-            return colorCollection.count
-        }
+      collectionView == emojiCollectionView  ? emojiCollection.count : colorCollection.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
