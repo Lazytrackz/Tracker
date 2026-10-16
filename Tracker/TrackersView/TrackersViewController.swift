@@ -207,7 +207,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func configureEmptyTrackerImage() {
-        let image = UIImage(named: "EmptyTrackerImage")
+        let image = UIImage(resource: .emptyTracker)
         emptyTrackerImage = UIImageView(image: image)
         emptyTrackerImage.contentMode = .scaleAspectFit
         emptyTrackerImage.translatesAutoresizingMaskIntoConstraints = false
