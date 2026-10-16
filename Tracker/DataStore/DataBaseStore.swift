@@ -37,7 +37,4 @@ final class DataBaseStore {
             }
         }
     }
-    
-    
-    
 }
