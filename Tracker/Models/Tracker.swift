@@ -5,12 +5,11 @@
 //  Created by Aleksey Kosichenko on 01.09.2026.
 //
 
-import Foundation
 import UIKit
 
 //MARK: - TrackerModel
 
-enum WeekDays: String {
+enum WeekDays: String, Codable {
     case sunday = "Воскресенье"
     case monday = "Понедельник"
     case tuesday = "Вторник"

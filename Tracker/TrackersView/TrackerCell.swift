@@ -40,8 +40,9 @@ final class TrackerCell: UICollectionViewCell {
         configureCell()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     //MARK: - Actions
@@ -119,7 +120,7 @@ final class TrackerCell: UICollectionViewCell {
             rectangleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             rectangleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             rectangleLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
-            rectangleLabel.heightAnchor.constraint(equalToConstant: 167),
+            rectangleLabel.heightAnchor.constraint(equalToConstant: 148),
         ])
     }
     
