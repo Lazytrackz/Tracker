@@ -39,10 +39,15 @@ final class TrackersViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        analyticsService.reportEvent(event: "open", params: ["screen" : "Main"])
         configureView()
         updateView()
         searchField.delegate = self
+      
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        analyticsService.reportEvent(event: "open", params: ["screen" : "Main"])
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -123,6 +128,7 @@ final class TrackersViewController: UIViewController {
             if filter {
                 emptyTrackerImage.image = UIImage(resource: .filter)
                 emptyTrackerLabel.text = "Ничего не найдено"
+                filterButton.isHidden = false
                 isTrackersForTodayFilterIsOn ? isTrackersForTodayFilterIsOn = false : nil
             }else {
                 emptyTrackerImage.image = UIImage(resource: .emptyTracker)
@@ -368,11 +374,11 @@ extension TrackersViewController: UICollectionViewDelegate {
                 let alertController = UIAlertController(title: "",
                                                         message: "Уверены что хотите удалить трекер?",
                                                         preferredStyle: .actionSheet)
+                self.analyticsService.reportEvent(event: "click", params: ["screen" : "Main", "item" : "delete"])
                 
                 let confirmAction = UIAlertAction(title: "Удалить", style: .destructive) { _ in
                     self.trackerViewModel.deleteTrackerRecord(tracker.id)
                     self.trackerViewModel.deleteTracker(tracker.id)
-                    self.analyticsService.reportEvent(event: "click", params: ["screen" : "Main", "item" : "delete"])
                     self.updateView()
                 }
                 
@@ -479,10 +485,12 @@ extension TrackersViewController: UIScrollViewDelegate {
         let bottomInset = scrollView.contentInset.bottom
         let scrollViewBottomOffset = scrollContentSizeHeight + bottomInset - scrollViewHeight
         
-        if scrollView.contentOffset.y > scrollViewBottomOffset && scrollView.contentOffset.y != 0   {
-            filterButton.isHidden = true
-        }else {
-            filterButton.isHidden = false
+        if !collectionView.isHidden{
+            if scrollView.contentOffset.y > scrollViewBottomOffset && scrollView.contentOffset.y != 0   {
+                filterButton.isHidden = true
+            }else {
+                filterButton.isHidden = false
+            }
         }
     }
 }

@@ -41,6 +41,7 @@ final class FilterViewController: UIViewController {
     }
     
     private func configureView() {
+        self.view.backgroundColor = .ypWhiteIOS
         configureTitleLabel()
         configureTableView()
     }

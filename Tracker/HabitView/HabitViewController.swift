@@ -57,6 +57,7 @@ final class HabitViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.view.backgroundColor = .ypWhiteIOS
         isNewTracker ? configuredViewForNewTracker() : configuredViewForExistingTracker()
     }
     

@@ -70,6 +70,7 @@ final class TrackerScheduleView: UIViewController {
     //MARK: - Private methods
     
     private func configureView() {
+        self.view.backgroundColor = .ypWhiteIOS
         configureTitle()
         configureDoneButton()
         configureSwitch()

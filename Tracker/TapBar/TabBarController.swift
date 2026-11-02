@@ -33,6 +33,9 @@ final class TabBarController: UITabBarController {
         tabBar.scrollEdgeAppearance = appearance
         tabBar.isTranslucent = false
         tabBar.backgroundColor = .ypWhiteIOS
+        let separator = UIView(frame: CGRect(x: 0, y: 0, width: tabBar.frame.width, height: 1))
+        separator.backgroundColor = .ypGrayIOS
+        tabBar.addSubview(separator)
     }
     
     private func configureViewControllers() {

@@ -47,6 +47,7 @@ final class CategoryViewController: UIViewController {
     //MARK: - Private methods
     
     private func configureView() {
+        self.view.backgroundColor = .ypWhiteIOS
         configureTitleLabel()
         configureEmptyTableIcon()
         configureEmptyTableLabel()

@@ -44,6 +44,7 @@ final class AddCategoryView: UIViewController {
     //MARK: - Private Methods
     
     private func configureView() {
+        self.view.backgroundColor = .ypWhiteIOS
         configureTitleLabel()
         configureCategoryNameLabel()
         configureDoneButton()

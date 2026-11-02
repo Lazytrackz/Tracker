@@ -7,9 +7,27 @@
 import Foundation
 import AppMetricaCore
 
+//MARK: - AnalyticsConstants
+
+enum AnalyticsEvent: String {
+    case open, close, click
+}
+
+enum AnalyticsScreen: String {
+    case main = "Main"
+}
+
+enum AnalyticsItem: String {
+    case addTrack = "add_track"
+    case track, filter, edit, delete
+}
+
+
 //MARK: - AnalyticsService
 
 final class AnalyticsService {
+    
+    
     
     //MARK: - Properties
     
