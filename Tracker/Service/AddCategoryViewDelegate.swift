@@ -7,8 +7,11 @@
 
 import Foundation
 
+//MARK: - AddCategoryViewDelegate
+
 protocol AddCategoryViewDelegate: AnyObject {
     
-    func updateCategoryView()
+    //MARK: - Methods
     
+    func updateCategoryView()
 }

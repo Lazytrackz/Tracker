@@ -17,7 +17,7 @@ final class CategoryViewController: UIViewController {
     
     //MARK: - Private properties
     
-    private var tableView: UITableView = UITableView()
+    private var tableView = UITableView()
     private var titleLabel = UILabel()
     private var emptyTableLabel = UILabel()
     private var emptyTableIcon = UIImageView()
@@ -61,13 +61,8 @@ final class CategoryViewController: UIViewController {
         }
         categoryViewModel?.updateCategoriesTableView()
         guard let count = categoryViewModel?.getCategoriesCount() else { return }
-        if count > 0 {
-            tableViewIsVisibility = true
-            changeTableViewVisibility()
-        } else {
-            tableViewIsVisibility = false
-            changeTableViewVisibility()
-        }
+        tableViewIsVisibility = count > 0
+        changeTableViewVisibility()
     }
     
     private func changeTableViewVisibility() {
@@ -148,9 +143,8 @@ final class CategoryViewController: UIViewController {
         addCategoryButton = UIButton(type: .roundedRect)
         addCategoryButton.backgroundColor = .ypBlackIOS
         addCategoryButton.setTitle("Добавить категорию", for: .normal)
-        addCategoryButton.setTitleColor(.white, for: .normal)
+        addCategoryButton.setTitleColor(.ypWhiteIOS, for: .normal)
         addCategoryButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        addCategoryButton.titleLabel?.textColor = UIColor(resource: .ypWhiteIOS)
         addCategoryButton.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
         addCategoryButton.layer.cornerRadius = 16
         addCategoryButton.layer.masksToBounds = true

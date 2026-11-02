@@ -52,13 +52,11 @@ final class TrackerCell: UICollectionViewCell {
             if buttonStatus {
                 checkButton.setImage(.buttonPlus, for: .normal)
                 self.completedTrackersCount -= 1
-                let countString = changeDaysCountEnding(countString: String(self.completedTrackersCount))
-                countLabel.text = "\(self.completedTrackersCount) \(countString)"//
+                countLabel.text = trackersCountStringFormatter()
             } else {
                 checkButton.setImage(.buttonCheckmark, for: .normal)
                 self.completedTrackersCount += 1
-                let countString = changeDaysCountEnding(countString: String(self.completedTrackersCount))
-                countLabel.text = "\(self.completedTrackersCount) \(countString)"//
+                countLabel.text = trackersCountStringFormatter()
             }
             buttonStatus.toggle()
             delegate?.trackerCellCheckButtonDidTap(self, buttonStatus: buttonStatus)
@@ -69,12 +67,11 @@ final class TrackerCell: UICollectionViewCell {
     
     func setNewCell(name: String, emoji: String, color: UIColor, checkButtonStatus: Bool, completedTrackersCount: Int, currentDate: Date) {
         self.completedTrackersCount = completedTrackersCount
-        let countString = changeDaysCountEnding(countString: String(self.completedTrackersCount))
         titleLabel.text = name
         emojiLabel.text = emoji
         rectangleLabel.layer.backgroundColor = color.cgColor
         checkButton.tintColor = color
-        countLabel.text = "\(self.completedTrackersCount) \(countString)"//
+        countLabel.text = trackersCountStringFormatter()
         buttonStatus = checkButtonStatus
         self.currentDate = currentDate
         checkButton.setImage(UIImage(resource: buttonStatus == true ? .buttonCheckmark: .buttonPlus), for: .normal)
@@ -82,25 +79,9 @@ final class TrackerCell: UICollectionViewCell {
     
     //MARK: - Private methods
     
-    private func changeDaysCountEnding(countString: String) -> String {
-        let number = Int(countString)
-        guard let number else { return "0"}
-        let lastTwoDigits = number % 100
-        let lastDigit = number % 10
-        if lastTwoDigits >= 11 && lastTwoDigits <= 14 {
-            return "дней"
-        }
-        switch lastDigit {
-        case _ where lastDigit == 1:
-            return "дeнь"
-        case _ where lastDigit >= 2 && lastDigit <= 4:
-            return "дня"
-        default:
-            return "дней"
-        }
-    }
-    
     private func configureCell() {
+        self.layer.cornerRadius = 16
+        self.layer.masksToBounds = true
         configureRectangleLabel()
         configureTitleLabel()
         configureEmojiLabel()
@@ -108,6 +89,13 @@ final class TrackerCell: UICollectionViewCell {
         configureCheckButton()
         configureCountLabel()
     }
+    
+    private func trackersCountStringFormatter() -> String {
+        return String.localizedStringWithFormat(
+            NSLocalizedString("daysCount", comment: "Number of completed trackers"),
+            self.completedTrackersCount)
+    }
+    
     
     private func configureRectangleLabel() {
         rectangleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -126,7 +114,7 @@ final class TrackerCell: UICollectionViewCell {
     
     private func configureTitleLabel(){
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.textColor = UIColor(named: "YP White (iOS)")
+        titleLabel.textColor = UIColor(resource: .ypWhiteFilterButton)
         titleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         titleLabel.numberOfLines = 0
         rectangleLabel.addSubview(titleLabel)

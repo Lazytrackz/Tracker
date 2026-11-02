@@ -1,0 +1,14 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Aleksey Kosichenko on 31.10.2026.
+  
+*/
+
+"view_trackers" = "Trackers";
+"view_filters" = "Filters";
+"view_statistics" = "Statistics";
+"tabbar_trackers" = "Trackers";
+"tabbar_statistics" = "Statistics";
+

@@ -12,14 +12,9 @@ import CoreData
 
 final class HabitViewController: UIViewController {
     
-    
-    //MARK: - Static properties
-    
-    static let didChangeNotification = Notification.Name("HabitViewControllerDidChange")
-    
     //MARK: - Private properties
     
-    private var trackerStore = TrackerStore()
+    private var habitViewModel = HabitViewModel()
     private let titleLabel: UILabel = UILabel()
     private var trackerNameTextField: UITextField = UITextField()
     private var trackerNameLabel: UILabel = UILabel()
@@ -36,8 +31,6 @@ final class HabitViewController: UIViewController {
     private var isTrackerNameCreated: Bool = false
     private var isEmojiSelected: Bool = false
     private var isColorSelected: Bool = false
-    private var categories: [TrackerCategory] = []
-    private var trackers: [Tracker] = []
     private var scheduleArray = [WeekDays]()
     private var scheduleViewController: TrackerScheduleView?
     private var categoryViewController =  CategoryViewController()
@@ -55,20 +48,22 @@ final class HabitViewController: UIViewController {
     private var categoryButtonStackView = UIStackView()
     private var scheduleButtonStackView = UIStackView()
     private var showCategoryLabel = UILabel()
-    private var showScheduleLabel = UILabel()
+    private var scheduleLabel = UILabel()
+    private var completedDaysLabel = UILabel()
+    private var isNewTracker = false
     
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        configuredView()
+        isNewTracker ? configuredViewForNewTracker() : configuredViewForExistingTracker()
     }
     
     // MARK: - Actions
     
     @objc private func didTapCreateButton() {
-        createTracker()
+        isNewTracker ? createTracker() : rewriteTracker()
         clearData()
         checkCreateButtonStatus()
         self.dismiss(animated: true, completion: nil)
@@ -94,19 +89,19 @@ final class HabitViewController: UIViewController {
     
     // MARK: - methods
     
-    func getCategories() -> [TrackerCategory] {
-        categories
+    func setLoadingViewStatus(isNewTracker: Bool) {
+        self.isNewTracker = isNewTracker
     }
     
     // MARK: - Private methods
     
-    private func configuredView() {
+    private func configuredViewForNewTracker() {
         configureScroll()
         configureMainView()
-        configureTitle()
+        configureTitle("Новая привычка")
         configureTrackerNameLabel()
         configureTrackerNameTextField()
-        configureCreateTrackerButton()
+        configureCreateTrackerButton("Создать")
         configureCancelTrackerButton()
         configureScheduleButton()
         configureCategoryButton()
@@ -115,6 +110,158 @@ final class HabitViewController: UIViewController {
         configureEmojiCollectionView()
         configureColorTitleLabel()
         configureColorCollectionView()
+    }
+    
+    private func configuredViewForExistingTracker() {
+        configureScroll()
+        configureMainView()
+        configureTitle("Редактирование привычки")
+        configureCompletedDaysLabel()
+        configureTrackerNameLabel()
+        configureTrackerNameTextField()
+        configureCreateTrackerButton("Сохранить")
+        configureCancelTrackerButton()
+        configureScheduleButton()
+        configureCategoryButton()
+        configureButtonsContainer()
+        configureEmojiTitleLabel()
+        configureEmojiCollectionView()
+        configureColorTitleLabel()
+        configureColorCollectionView()
+        
+        updateView()
+        
+    }
+    
+    private func updateView() {
+        habitViewModel.categoryUpdated = { [weak self] in
+            self?.setCategory()
+        }
+        habitViewModel.trackerUpdated = { [weak self] in
+            self?.setTracker()
+        }
+        habitViewModel.completedTrackerCountUpdated = { [weak self ] in
+            self?.setCompletedTrackerCount()}
+        
+        habitViewModel.updateHabitView()
+    }
+    
+    private func setCategory(){
+        guard let name = habitViewModel.getCategoryName() else { return }
+        showCategoryLabel(name)
+    }
+    
+    private func setTracker(){
+        guard let trackerName = habitViewModel.getTracker()?.name else { return }
+        guard let schedule = habitViewModel.getTracker()?.schedule else { return }
+        
+        trackerNameTextField.text = trackerName
+        trackerTextFieldCompleted()
+        showScheduleLabel(schedule)
+        
+    }
+    
+    private func setCompletedTrackerCount(){
+        guard let completedTrackersDays = habitViewModel.getCompletedTrackerCount() else { return }
+        let countTrackersString = String.localizedStringWithFormat(
+            NSLocalizedString("daysCount", comment: "Number of completed trackers"),
+            completedTrackersDays
+        )
+        completedDaysLabel.text = countTrackersString
+    }
+    
+    private func showCategoryLabel(_ categoryName: String) {
+        trackerCategoryName = categoryName
+        isCategoryChosen = true
+        checkCreateButtonStatus()
+        guard let trackerCategoryName else { return }
+        configureShowCategoryLabel(trackerCategoryName)
+        categoryButtonStackView.addArrangedSubview(showCategoryLabel)
+    }
+    
+    private func showScheduleLabel(_ scheduleArray: [WeekDays]) {
+        self.scheduleArray = scheduleArray
+        isScheduleCreated = true
+        checkCreateButtonStatus()
+        if !self.scheduleArray.isEmpty {
+            let dayList = convertWeekDays(self.scheduleArray)
+            configureShowScheduleLabel(dayList)
+            scheduleButtonStackView.addArrangedSubview(scheduleLabel)
+        }
+    }
+    
+    private func setSelectedEmoji(_ cell: EmojiCollectionCell, _ indexPath: IndexPath) {
+        isEmojiSelected = true
+        cell.setEmojiLabelColorStatus(isEmojiSelected)
+        trackerEmoji = emojiCollection[indexPath.row]
+        checkCreateButtonStatus()
+    }
+    
+    private func setDeselectedEmoji(_ cell: EmojiCollectionCell, _ indexPath: IndexPath) {
+        isEmojiSelected = false
+        cell.setEmojiLabelColorStatus(isEmojiSelected)
+        checkCreateButtonStatus()
+    }
+    
+    private func setSelectedColor(_ cell: ColorCollectionCell, _ indexPath: IndexPath) {
+        isColorSelected = true
+        cell.setBorderLabelColorStatus(isColorSelected)
+        trackerColor = colorCollection[indexPath.row]
+        checkCreateButtonStatus()
+    }
+    
+    private func setDeselectedColor(_ cell: ColorCollectionCell, _ indexPath: IndexPath) {
+        isColorSelected = false
+        cell.setBorderLabelColorStatus(isColorSelected)
+        checkCreateButtonStatus()
+    }
+    
+    private func deselectEmojiCell(_ collectionView: UICollectionView) {
+        var indexPath: IndexPath?
+        guard let emoji = habitViewModel.getTracker()?.emoji else { return }
+        
+        for (index, currentEmoji) in emojiCollection.enumerated() {
+            if currentEmoji == emoji {
+                indexPath = IndexPath(item: index, section: 0)
+            }
+        }
+        guard let indexPath else { return }
+        guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionCell else { return }
+        setDeselectedEmoji(cell, indexPath)
+    }
+    
+    private func deselectColorCell(_ collectionView: UICollectionView) {
+        var indexPath: IndexPath?
+        guard let color = habitViewModel.getTracker()?.color else { return }
+        
+        for (index, currentColor) in colorCollection.enumerated() {
+            if currentColor == color {
+                indexPath = IndexPath(item: index, section: 0)
+            }
+        }
+        guard let indexPath else { return }
+        guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionCell else { return }
+        setDeselectedColor(cell, indexPath)
+    }
+    
+    private func trackerTextFieldCompleted() {
+        isTrackerNameCreated = true
+        checkCreateButtonStatus()
+    }
+    
+    private func configureCompletedDaysLabel() {
+        completedDaysLabel.translatesAutoresizingMaskIntoConstraints = false
+        completedDaysLabel.textColor = UIColor(resource: .ypBlackIOS)
+        completedDaysLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        completedDaysLabel.text = " дней"
+        completedDaysLabel.textAlignment = .center
+        mainView.addSubview(completedDaysLabel)
+        
+        NSLayoutConstraint.activate([
+            completedDaysLabel.topAnchor.constraint(equalTo: titleLabel.topAnchor, constant: 38),
+            completedDaysLabel.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 16),
+            completedDaysLabel.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -16)
+        ])
     }
     
     private func configureScroll() {
@@ -178,16 +325,30 @@ final class HabitViewController: UIViewController {
     private func configureColorCell(cell: ColorCollectionCell, indexPath: IndexPath) {
         let color = colorCollection[indexPath.row]
         cell.setNewCell(color: color)
+        
+        if !isNewTracker {
+            guard let selectedColor = habitViewModel.getTracker()?.color else { return }
+            if selectedColor == colorCollection[indexPath.row] {
+                setSelectedColor(cell, indexPath)
+            }
+        }
     }
     
     private func configureEmojiCell(cell: EmojiCollectionCell, indexPath: IndexPath) {
         let emoji = emojiCollection[indexPath.row]
         cell.setNewCell(emoji: emoji)
+        
+        if !isNewTracker {
+            guard let selectedEmoji = habitViewModel.getTracker()?.emoji else { return }
+            if selectedEmoji == emojiCollection[indexPath.row] {
+                setSelectedEmoji(cell, indexPath)
+            }
+        }
     }
     
     private func configureEmojiTitleLabel() {
         emojiTitleLabel.font = UIFont.systemFont(ofSize: 19, weight: .bold)
-        emojiTitleLabel.textColor = UIColor(named: "YP Black (iOS)")
+        emojiTitleLabel.textColor = UIColor(resource: .ypBlackIOS)
         emojiTitleLabel.text = "Emoji"
         emojiTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         mainView.addSubview(emojiTitleLabel)
@@ -220,7 +381,8 @@ final class HabitViewController: UIViewController {
     private func clearData() {
         trackerNameTextField.text = ""
         trackerEmoji = ""
-        showScheduleLabel.removeFromSuperview()
+        completedDaysLabel.text = ""
+        scheduleLabel.removeFromSuperview()
         showCategoryLabel.removeFromSuperview()
         isScheduleCreated = false
         isCategoryChosen = false
@@ -229,6 +391,7 @@ final class HabitViewController: UIViewController {
         isColorSelected = false
         emojiCollectionView.reloadData()
         colorCollectionView.reloadData()
+        habitViewModel.deleteAllData()
     }
     
     private func checkCreateButtonStatus() {
@@ -241,14 +404,16 @@ final class HabitViewController: UIViewController {
         trackerId += 1
         let trackerName = trackerNameTextField.text
         let tracker = Tracker(id: trackerId, name: trackerName, color: trackerColor, emoji: trackerEmoji, schedule: scheduleArray)
-        trackers.append(tracker)
-        
-        do {
-            guard let trackerCategoryName else { return }
-            try trackerStore.updateData(tracker, trackerCategoryName)
-        } catch {
-            print(error)
-        }
+        guard let trackerCategoryName else { return }
+        habitViewModel.createTracker(tracker, trackerCategoryName)
+    }
+    
+    private func rewriteTracker() {
+        guard let trackerId = habitViewModel.getTracker()?.id else { return }
+        let trackerName = trackerNameTextField.text
+        let tracker = Tracker(id: trackerId, name: trackerName, color: trackerColor, emoji: trackerEmoji, schedule: scheduleArray)
+        guard let trackerCategoryName else { return }
+        habitViewModel.rewriteExistingTracker(tracker, trackerCategoryName)
     }
     
     
@@ -291,12 +456,22 @@ final class HabitViewController: UIViewController {
         trackerNameLabel.translatesAutoresizingMaskIntoConstraints = false
         mainView.addSubview(trackerNameLabel)
         
-        NSLayoutConstraint.activate([
-            trackerNameLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
-            trackerNameLabel.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 16),
-            trackerNameLabel.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -16),
-            trackerNameLabel.heightAnchor.constraint(equalToConstant: 75),
-        ])
+        
+        if isNewTracker {
+            NSLayoutConstraint.activate([
+                trackerNameLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
+                trackerNameLabel.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 16),
+                trackerNameLabel.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -16),
+                trackerNameLabel.heightAnchor.constraint(equalToConstant: 75),
+            ])
+        }else {
+            NSLayoutConstraint.activate([
+                trackerNameLabel.topAnchor.constraint(equalTo: completedDaysLabel.bottomAnchor, constant: 40),
+                trackerNameLabel.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 16),
+                trackerNameLabel.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -16),
+                trackerNameLabel.heightAnchor.constraint(equalToConstant: 75),
+            ])
+        }
     }
     
     private func configureTrackerNameTextField() {
@@ -381,10 +556,10 @@ final class HabitViewController: UIViewController {
     }
     
     private func configureShowScheduleLabel(_ schedule: String) {
-        showScheduleLabel.text = schedule
-        showScheduleLabel.textColor = UIColor(resource: .ypGrayIOS)
-        showScheduleLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        showScheduleLabel.translatesAutoresizingMaskIntoConstraints = false
+        scheduleLabel.text = schedule
+        scheduleLabel.textColor = UIColor(resource: .ypGrayIOS)
+        scheduleLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        scheduleLabel.translatesAutoresizingMaskIntoConstraints = false
     }
     
     
@@ -412,7 +587,7 @@ final class HabitViewController: UIViewController {
         cancelTrackerButton.setTitle("Отменить", for: .normal)
         cancelTrackerButton.setTitleColor(.ypRedIOS, for: .normal)
         cancelTrackerButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        cancelTrackerButton.titleLabel?.textColor = UIColor(named: "YP Red (iOS)")
+        //cancelTrackerButton.titleLabel?.textColor = UIColor(resource: .ypRedIOS)
         cancelTrackerButton.addTarget(self, action: #selector(didTapCancelButton), for: .touchUpInside)
         cancelTrackerButton.layer.cornerRadius = 16
         cancelTrackerButton.layer.masksToBounds = true
@@ -427,13 +602,13 @@ final class HabitViewController: UIViewController {
         ])
     }
     
-    private func configureCreateTrackerButton() {
+    private func configureCreateTrackerButton(_ buttonName: String) {
         createTrackerButton = UIButton(type: .roundedRect)
         createTrackerButton.backgroundColor = .ypGrayIOS
-        createTrackerButton.setTitle("Создать", for: .normal)
-        createTrackerButton.setTitleColor(.white, for: .normal)
+        createTrackerButton.setTitle(buttonName, for: .normal)
+        createTrackerButton.setTitleColor(.ypWhiteIOS, for: .normal)
+        createTrackerButton.setTitleColor(.ypWhiteFilterButton, for: .disabled)
         createTrackerButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        createTrackerButton.titleLabel?.textColor = UIColor(named: "YP White (iOS)")
         createTrackerButton.addTarget(self, action: #selector(didTapCreateButton), for: .touchUpInside)
         createTrackerButton.layer.cornerRadius = 16
         createTrackerButton.layer.masksToBounds = true
@@ -449,17 +624,18 @@ final class HabitViewController: UIViewController {
         ])
     }
     
-    private func configureTitle() {
+    private func configureTitle(_ titleName: String) {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.textColor = UIColor(resource: .ypBlackIOS)
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        titleLabel.text = "Новая привычка"
+        titleLabel.text = titleName
+        titleLabel.textAlignment = .center
         mainView.addSubview(titleLabel)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: mainView.topAnchor, constant: 38),
-            titleLabel.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 114),
-            titleLabel.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -112)
+            titleLabel.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 79),
+            titleLabel.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -78)
         ])
     }
     
@@ -509,14 +685,7 @@ extension HabitViewController: ScheduleViewDelegate {
     //MARK: - Methods
     
     func scheduleViewDoneButtonDidTap(scheduleArray: [WeekDays]) {
-        self.scheduleArray = scheduleArray
-        isScheduleCreated = true
-        checkCreateButtonStatus()
-        if !self.scheduleArray.isEmpty {
-            let dayList = convertWeekDays(self.scheduleArray)
-            configureShowScheduleLabel(dayList)
-            scheduleButtonStackView.addArrangedSubview(showScheduleLabel)
-        }
+        showScheduleLabel(scheduleArray)
     }
 }
 
@@ -526,8 +695,7 @@ extension HabitViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-        isTrackerNameCreated = true
-        checkCreateButtonStatus()
+        trackerTextFieldCompleted()
         return true
     }
     
@@ -601,32 +769,32 @@ extension HabitViewController: UICollectionViewDelegate {
     //MARK: - Methods
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
         if collectionView == emojiCollectionView {
-            let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionCell
-            isEmojiSelected = true
-            cell?.setEmojiLabelColorStatus(isEmojiSelected)
-            trackerEmoji = emojiCollection[indexPath.row]
-            checkCreateButtonStatus()
+            guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionCell else { return }
+            
+            if !isNewTracker {
+                deselectEmojiCell(collectionView)
+            }
+            
+            setSelectedEmoji(cell, indexPath)
+            
         }else {
-            let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionCell
-            isColorSelected = true
-            cell?.setBorderLabelColorStatus(isColorSelected)
-            trackerColor = colorCollection[indexPath.row]
-            checkCreateButtonStatus()
+            guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionCell else { return }
+            if !isNewTracker {
+                deselectColorCell(collectionView)
+            }
+            setSelectedColor(cell, indexPath)
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         if collectionView == emojiCollectionView {
-            let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionCell
-            isEmojiSelected = false
-            cell?.setEmojiLabelColorStatus(isEmojiSelected)
-            checkCreateButtonStatus()
+            guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionCell else { return }
+            setDeselectedEmoji(cell, indexPath)
         }else {
-            let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionCell
-            isColorSelected = false
-            cell?.setBorderLabelColorStatus(isColorSelected)
-            checkCreateButtonStatus()
+            guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionCell else { return }
+            setDeselectedColor(cell, indexPath)
         }
     }
 }
@@ -636,11 +804,6 @@ extension HabitViewController: CategoryViewControllerDelegate {
     //MARK: - Methods
     
     func setCategory(_ categoryName: String) {
-        trackerCategoryName = categoryName
-        isCategoryChosen = true
-        checkCreateButtonStatus()
-        guard let trackerCategoryName else { return }
-        configureShowCategoryLabel(trackerCategoryName)
-        categoryButtonStackView.addArrangedSubview(showCategoryLabel)
+        showCategoryLabel(categoryName)
     }
 }

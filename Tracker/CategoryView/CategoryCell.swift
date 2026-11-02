@@ -30,6 +30,12 @@ final class CategoryCell: UITableViewCell {
         configureCell()
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let inset = UIEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
+        contentView.frame = contentView.frame.inset(by: inset)
+    }
+    
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         nil
@@ -108,12 +114,7 @@ final class CategoryCell: UITableViewCell {
     }
     
     private func checkSelectedCell() {
-        if isSelectedCell {
-            choiceButton.isEnabled = true
-            choiceButton.isHidden = false
-        } else {
-            choiceButton.isEnabled = false
-            choiceButton.isHidden = true
-        }
+        choiceButton.isEnabled = isSelectedCell
+        choiceButton.isHidden = !isSelectedCell
     }
 }

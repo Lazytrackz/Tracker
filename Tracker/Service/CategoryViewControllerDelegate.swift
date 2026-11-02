@@ -7,8 +7,11 @@
 
 import Foundation
 
+//MARK: - CategoryViewControllerDelegate
+
 protocol CategoryViewControllerDelegate: AnyObject {
     
-    func setCategory(_ categoryName: String)
+    //MARK: - Methods
     
+    func setCategory(_ categoryName: String)
 }

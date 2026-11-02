@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		03E4211D30965D3400A83F9F /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 03E4211C30965D3400A83F9F /* SnapshotTesting */; };
+		03E4212A30975E9300A83F9F /* YandexMobileMetrica in Frameworks */ = {isa = PBXBuildFile; productRef = 03E4212930975E9300A83F9F /* YandexMobileMetrica */; };
+		03E4212C30975E9300A83F9F /* YandexMobileMetricaCrashes in Frameworks */ = {isa = PBXBuildFile; productRef = 03E4212B30975E9300A83F9F /* YandexMobileMetricaCrashes */; };
+		03E4212F309760D500A83F9F /* AppMetricaCore in Frameworks */ = {isa = PBXBuildFile; productRef = 03E4212E309760D500A83F9F /* AppMetricaCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		03F0E4323042EE8E0020523D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +72,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03E4212F309760D500A83F9F /* AppMetricaCore in Frameworks */,
+				03E4212A30975E9300A83F9F /* YandexMobileMetrica in Frameworks */,
+				03E4212C30975E9300A83F9F /* YandexMobileMetricaCrashes in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03E4211D30965D3400A83F9F /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +136,9 @@
 			);
 			name = Tracker;
 			packageProductDependencies = (
+				03E4212930975E9300A83F9F /* YandexMobileMetrica */,
+				03E4212B30975E9300A83F9F /* YandexMobileMetricaCrashes */,
+				03E4212E309760D500A83F9F /* AppMetricaCore */,
 			);
 			productName = Tracker;
 			productReference = 03F0E41B3042EE8C0020523D /* Tracker.app */;
@@ -148,6 +162,7 @@
 			);
 			name = TrackerTests;
 			packageProductDependencies = (
+				03E4211C30965D3400A83F9F /* SnapshotTesting */,
 			);
 			productName = TrackerTests;
 			productReference = 03F0E4313042EE8E0020523D /* TrackerTests.xctest */;
@@ -205,9 +220,15 @@
 			knownRegions = (
 				en,
 				Base,
+				ru,
 			);
 			mainGroup = 03F0E4123042EE8C0020523D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				03E4211B30965D3400A83F9F /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				03E4212830975E9300A83F9F /* XCRemoteSwiftPackageReference "metrica-sdk-ios" */,
+				03E4212D309760D500A83F9F /* XCRemoteSwiftPackageReference "appmetrica-sdk-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 03F0E41C3042EE8C0020523D /* Products */;
 			projectDirPath = "";
@@ -351,6 +372,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -415,6 +437,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -475,7 +498,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 89C882J3X3;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.lazytrackz.TrackerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -497,7 +520,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 89C882J3X3;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.lazytrackz.TrackerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -591,6 +614,56 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		03E4211B30965D3400A83F9F /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.19.7;
+			};
+		};
+		03E4212830975E9300A83F9F /* XCRemoteSwiftPackageReference "metrica-sdk-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/yandexmobile/metrica-sdk-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
+		03E4212D309760D500A83F9F /* XCRemoteSwiftPackageReference "appmetrica-sdk-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/appmetrica/appmetrica-sdk-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		03E4211C30965D3400A83F9F /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 03E4211B30965D3400A83F9F /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+		03E4212930975E9300A83F9F /* YandexMobileMetrica */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 03E4212830975E9300A83F9F /* XCRemoteSwiftPackageReference "metrica-sdk-ios" */;
+			productName = YandexMobileMetrica;
+		};
+		03E4212B30975E9300A83F9F /* YandexMobileMetricaCrashes */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 03E4212830975E9300A83F9F /* XCRemoteSwiftPackageReference "metrica-sdk-ios" */;
+			productName = YandexMobileMetricaCrashes;
+		};
+		03E4212E309760D500A83F9F /* AppMetricaCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 03E4212D309760D500A83F9F /* XCRemoteSwiftPackageReference "appmetrica-sdk-ios" */;
+			productName = AppMetricaCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 03F0E4133042EE8C0020523D /* Project object */;
 }

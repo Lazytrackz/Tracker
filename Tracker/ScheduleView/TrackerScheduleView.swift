@@ -99,7 +99,7 @@ final class TrackerScheduleView: UIViewController {
             labelContainer.translatesAutoresizingMaskIntoConstraints = false
             labelContainer.isUserInteractionEnabled = true
             
-            labelContainer.textColor = UIColor(named: "YP Black (iOS)")
+            labelContainer.textColor = UIColor(resource: .ypBlackIOS)
             labelContainer.font = UIFont.systemFont(ofSize: 17, weight: .regular)
             let switchLabel = UILabel()
             switchLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -178,7 +178,7 @@ final class TrackerScheduleView: UIViewController {
         doneButton.backgroundColor = .ypBlackIOS
         doneButton.setTitle("Готово", for: .normal)
         doneButton.titleLabel?.font = .systemFont(ofSize: 16)
-        doneButton.setTitleColor(.white, for: .normal)
+        doneButton.setTitleColor(.ypWhiteIOS, for: .normal)
         doneButton.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
         doneButton.layer.cornerRadius = 16
         doneButton.layer.masksToBounds = true

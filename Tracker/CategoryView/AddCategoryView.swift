@@ -79,10 +79,8 @@ final class AddCategoryView: UIViewController {
             categoryNameLabel.heightAnchor.constraint(equalToConstant: 75),
             categoryNameLabel.widthAnchor.constraint(equalToConstant: 343),
         ])
-        
         configureTextField()
     }
-    
     
     private func configureTextField() {
         categoryNameTextField.placeholder = "Введите название категории"
@@ -104,7 +102,7 @@ final class AddCategoryView: UIViewController {
         doneButton = UIButton(type: .roundedRect)
         doneButton.backgroundColor = .ypGrayIOS
         doneButton.setTitle("Готово", for: .normal)
-        doneButton.setTitleColor(.white, for: .normal)
+        doneButton.setTitleColor(.ypWhiteIOS, for: .normal)
         doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         doneButton.titleLabel?.textColor = UIColor(resource: .ypWhiteIOS)
         doneButton.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
