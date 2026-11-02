@@ -12,12 +12,31 @@ import UIKit
 
 final class TabBarController: UITabBarController {
     
+    // MARK: - Private properties
+    
+   
+
+   
+    
+  
+    
     // MARK: - Lifecycle
     
+   
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+       
+        
         configureTabBarAppearance()
         configureViewControllers()
+        
+     
+        
+        //onboardingViewController.onboardingViewDelegate = self
+        
+       
+        
     }
     
     // MARK: - Private methods
@@ -52,3 +71,5 @@ final class TabBarController: UITabBarController {
         self.viewControllers = [navigationController, statsViewController]
     }
 }
+
+

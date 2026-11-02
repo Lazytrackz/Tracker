@@ -44,14 +44,27 @@ final class TrackerCategoryStore: NSObject {
     
     //MARK: - Methods
     
+    func fetchCategoryList(completion: ([String]) -> Void) {
+        var categories = [String]()
+        let fetchRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
+        fetchRequest.returnsObjectsAsFaults = false
+        let results = try? context.fetch(fetchRequest)
+        
+        guard let results else { return }
+        for (_, entity) in results.enumerated() {
+            categories.append(entity.name ?? "")
+        }
+        completion(categories)
+    }
+    
     func getCategoryArray(currentDate: String) -> [TrackerCategory] {
         var categoryArray = [TrackerCategory]()
-        var trackerArray = [Tracker]()
+        
         guard let objects = self.fetchedResultsController.fetchedObjects else { return [] }
         
         for (_, entity) in objects.enumerated() {
             let trackersSet = entity.value(forKey: "trackers") as? Set<TrackerCoreData> ?? []
-            
+            var trackerArray = [Tracker]()
             for tracker in trackersSet {
                 let scheduleSet = tracker.value(forKey: "schedule") as? Array<WeekDays> ?? []
                 for days in scheduleSet {
@@ -60,51 +73,56 @@ final class TrackerCategoryStore: NSObject {
                         guard let color = tracker.color as? UIColor,
                               let schedule = tracker.schedule as? [WeekDays],
                               let emoji = tracker.emoji else {return []}
-    
+                        
                         let tracker = Tracker(id: UInt(tracker.id), name: tracker.name, color: color, emoji: emoji, schedule: schedule)
                         trackerArray.append(tracker)
                     }
                 }
             }
             trackerArray.sort(by: {$0.id < $1.id})
-            categoryArray.append(TrackerCategory(name: entity.name ?? "", trackers: trackerArray))
-            categoryArray.sort(by: {$0.name < $1.name})
+            
+            if !trackerArray.isEmpty {
+                categoryArray.append(TrackerCategory(name: entity.name ?? "", trackers: trackerArray))
+                categoryArray.sort(by: {$0.name < $1.name})
+            }
         }
         return categoryArray
     }
     
-    func updateData(_ trackerCategoryName: String, _ tracker: Tracker) throws {
-        guard let trackerCategoryCoreData = checkExistingCategory(trackerCategoryName) else { return }
-        DataBaseStore.shared.saveContext()
-        try trackerStore.updateData(tracker, trackerCategoryCoreData)
+    func addCategory(_ name: String) {
+        if checkExistingCategory(name) {
+            let trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
+            trackerCategoryCoreData.name = name
+            DataBaseStore.shared.saveContext()
+        } else {
+            print("error")
+        }
     }
     
     //MARK: - Private methods
     
-    private func checkExistingCategory(_ trackerCategoryName: String) -> TrackerCategoryCoreData? {
-        var trackerCategoryCoreData: TrackerCategoryCoreData?
+    private func checkExistingCategory(_ trackerCategoryName: String) -> Bool {
         let fetchRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
         fetchRequest.returnsObjectsAsFaults = false
         let predicate = NSPredicate(format: "%K== %@", #keyPath(TrackerCategoryCoreData.name), trackerCategoryName)
         fetchRequest.predicate = predicate
         let results = try? context.fetch(fetchRequest)
-        guard let results else { return nil }
+        guard let results else { return false }
         
         if !results.isEmpty {
-            guard let result = results.first else { return TrackerCategoryCoreData(context: context) }
-            trackerCategoryCoreData = result
+            return false
         }else {
-            trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
-            trackerCategoryCoreData?.name = trackerCategoryName
+            return true
         }
-        guard let trackerCategoryCoreData else { return nil }
-        return trackerCategoryCoreData
     }
 }
 
 //MARK: - Extension
 
 extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
+    
+    //MARK: - Methods
+    
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.didUpdate()
     }

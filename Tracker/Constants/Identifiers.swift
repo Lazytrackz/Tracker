@@ -7,7 +7,7 @@
 
 import Foundation
 
-//MARK: - IIdentifiers
+//MARK: - Identifiers
 
 enum Identifiers {
     static let trackerCellID = "categoryCell"
