@@ -35,6 +35,8 @@ final class TrackersViewController: UIViewController {
     private var isIncompleteTrackersIsOn = false
     private let analyticsService = AnalyticsService()
     
+    private var indexPath = IndexPath()
+    
     //MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -47,12 +49,12 @@ final class TrackersViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        analyticsService.reportEvent(event: "open", params: ["screen" : "Main"])
+        analyticsService.report(.open, screen: .main)
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        analyticsService.reportEvent(event: "close", params: ["screen" : "Main"])
+        analyticsService.report(.close, screen: .main)
     }
     
     //MARK: - Actions
@@ -66,7 +68,8 @@ final class TrackersViewController: UIViewController {
         self.habitViewController = HabitViewController()
         guard let habitViewController else { return }
         habitViewController.setLoadingViewStatus(isNewTracker: true)
-        analyticsService.reportEvent(event: "click", params: ["screen" : "Main", "item" : "add_track"])
+        analyticsService.report(.click, screen: .main, item: .addTrack)
+        
         present(habitViewController, animated: true, completion: nil)
     }
     
@@ -80,7 +83,7 @@ final class TrackersViewController: UIViewController {
         filterViewController = FilterViewController()
         filterViewController?.delegate = self
         guard let filterViewController else { return }
-        analyticsService.reportEvent(event: "click", params: ["screen" : "Main", "item" : "filter"])
+        analyticsService.report(.click, screen: .main, item: .filter)
         present(filterViewController, animated: true)
     }
     
@@ -322,7 +325,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         
         let name = trackerViewModel.getCategory(at: indexPath.section)
         view.titleLabel.text = name
-        view.titleLabel.textColor = UIColor(named: "YP Black (iOS)")
+        view.titleLabel.textColor = UIColor(resource: .ypBlackIOS)
         view.titleLabel.font = UIFont.systemFont(ofSize: 19, weight: .bold)
         return view
     }
@@ -353,12 +356,21 @@ extension TrackersViewController: UICollectionViewDelegate {
         return count
     }
     
+    func collectionView(_: UICollectionView, willEndContextMenuInteraction: UIContextMenuConfiguration, animator: (any UIContextMenuInteractionAnimating)?) {
+        guard let cell = collectionView.cellForItem(at: self.indexPath) as? TrackerCell else { return }
+        cell.bounds.size.height = 148
+    }
+    
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let categoryName = trackerViewModel.getCategory(at: indexPath.section)
         let tracker = trackerViewModel.getTracker(at: indexPath.section, at: indexPath.row)
         let completedTrackerCount = trackerViewModel.checkCompletedTrackers(tracker.id).completedTrackersCount
+        
+        guard let cell = collectionView.cellForItem(at: indexPath) as? TrackerCell else { return nil }
+        self.indexPath = indexPath
+        cell.bounds.size.height = 90
+        
         let configuration = UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { actions -> UIMenu? in
-            
             let editAction = UIAction(title: "Редактировать", identifier: nil) { _ in
                 self.trackerViewModel.saveExistingTracker(tracker)
                 self.trackerViewModel.saveCategoryName(categoryName)
@@ -366,7 +378,7 @@ extension TrackersViewController: UICollectionViewDelegate {
                 self.habitViewController = HabitViewController()
                 self.habitViewController?.setLoadingViewStatus(isNewTracker: false)
                 guard let view = self.habitViewController else { return }
-                self.analyticsService.reportEvent(event: "click", params: ["screen" : "Main", "item" : "edit"])
+                self.analyticsService.report(.click, screen: .main, item: .edit)
                 self.present(view, animated: true)
             }
             
@@ -374,7 +386,7 @@ extension TrackersViewController: UICollectionViewDelegate {
                 let alertController = UIAlertController(title: "",
                                                         message: "Уверены что хотите удалить трекер?",
                                                         preferredStyle: .actionSheet)
-                self.analyticsService.reportEvent(event: "click", params: ["screen" : "Main", "item" : "delete"])
+                self.analyticsService.report(.click, screen: .main, item: .delete)
                 
                 let confirmAction = UIAlertAction(title: "Удалить", style: .destructive) { _ in
                     self.trackerViewModel.deleteTrackerRecord(tracker.id)
@@ -399,8 +411,13 @@ extension TrackersViewController: UICollectionViewDelegate {
                           options: UIMenu.Options.displayInline,
                           children: [editAction, deleteAction])
         }
+        
         return configuration
     }
+    
+    
+  
+    
 }
 
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
@@ -445,7 +462,7 @@ extension TrackersViewController: TrackerCellDelegate {
     //MARK: - Methods
     
     func trackerCellCheckButtonDidTap(_ cell: TrackerCell, buttonStatus: Bool) {
-        analyticsService.reportEvent(event: "click", params: ["screen" : "Main", "item" : "track"])
+        analyticsService.report(.click, screen: .main, item: .track)
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
         let trackerId = trackerViewModel.getTracker(at: indexPath.section, at: indexPath.row).id
         let newTrackerRecord = TrackerRecord(trackerId: trackerId, date: currentDate)

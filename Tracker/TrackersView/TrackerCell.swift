@@ -32,7 +32,6 @@ final class TrackerCell: UICollectionViewCell {
     private let trackersViewController = TrackersViewController()
     private var currentDate: Date = Date()
     
-    
     //MARK: - Init
     
     override init(frame: CGRect) {
@@ -77,6 +76,10 @@ final class TrackerCell: UICollectionViewCell {
         checkButton.setImage(UIImage(resource: buttonStatus == true ? .buttonCheckmark: .buttonPlus), for: .normal)
     }
     
+    func test() {
+        footerLabel.isHidden = true
+    }
+    
     //MARK: - Private methods
     
     private func configureCell() {
@@ -108,7 +111,7 @@ final class TrackerCell: UICollectionViewCell {
             rectangleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             rectangleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             rectangleLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
-            rectangleLabel.heightAnchor.constraint(equalToConstant: 148),
+            rectangleLabel.heightAnchor.constraint(equalToConstant: 90),
         ])
     }
     
@@ -153,7 +156,6 @@ final class TrackerCell: UICollectionViewCell {
             footerLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             footerLabel.topAnchor.constraint(equalTo: rectangleLabel.bottomAnchor),
             footerLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            footerLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             footerLabel.heightAnchor.constraint(equalToConstant: 58),
             footerLabel.widthAnchor.constraint(equalToConstant: 167),
         ])

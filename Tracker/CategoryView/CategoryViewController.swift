@@ -35,6 +35,12 @@ final class CategoryViewController: UIViewController {
         updateData()
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        tableView.reloadData()
+    }
+    
+    
     //MARK: - Actions
     
     @objc private func didTapAddButton() {
@@ -163,7 +169,8 @@ final class CategoryViewController: UIViewController {
     
     private func configCell(for cell: CategoryCell, with indexPath: IndexPath){
         guard let categoryName = categoryViewModel?.getCategoriesName(at: indexPath.row) else { return }
-        cell.delegate = self
+        //cell.delegate = self
+        cell.selectCell(false)
         cell.setCategoryText(categoryName)
     }
 }
@@ -203,6 +210,10 @@ extension CategoryViewController: UITableViewDataSource{
         let cell = tableView.cellForRow(at: indexPath)
         guard let categoryCell = cell as? CategoryCell else { return }
         categoryCell.selectCell(true)
+        guard let categoryName = selectedItem else { return }
+        delegate?.setCategory(categoryName)
+        self.dismiss(animated: true)
+        
     }
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
@@ -221,7 +232,7 @@ extension CategoryViewController: AddCategoryViewDelegate {
     }
 }
 
-extension CategoryViewController: CategoryCellDelegate {
+/*extension CategoryViewController: CategoryCellDelegate {
     
     //MARK: - Methods
     
@@ -230,4 +241,4 @@ extension CategoryViewController: CategoryCellDelegate {
         delegate?.setCategory(categoryName)
         self.dismiss(animated: true)
     }
-}
+}*/

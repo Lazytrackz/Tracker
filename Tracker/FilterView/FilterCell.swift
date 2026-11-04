@@ -13,14 +13,15 @@ final class FilterCell: UITableViewCell {
     
     //MARK: - Delegate
     
-    weak var delegate: FilterCellDelegate?
+    //weak var delegate: FilterCellDelegate?
     
     //MARK: - Private properties
     
     private var filterViewMode = FilterViewModel()
     private var filterNameLabel = UILabel()
     private var filterTextField = UILabel()
-    private var choiceButton = UIButton()
+    //private var choiceButton = UIButton()
+    private var choiceImage = UIImageView()
     private var isSelectedCell = false
     
     //MARK: - Init
@@ -44,7 +45,7 @@ final class FilterCell: UITableViewCell {
     //MARK: - Actions
     
     @objc private func didTapChoiceButton() {
-        delegate?.didCloseFilterView()
+        //delegate?.didCloseFilterView()
     }
     
     //MARK: - Methods
@@ -91,7 +92,8 @@ final class FilterCell: UITableViewCell {
         ])
         
         configureTextField()
-        configureChoiceButton()
+        //configureChoiceButton()
+        configureChoiceImage()
     }
     
     private func configureTextField() {
@@ -105,7 +107,7 @@ final class FilterCell: UITableViewCell {
         ])
     }
     
-    private func configureChoiceButton() {
+    /*private func configureChoiceButton() {
         let image = UIImage(resource: .checkIcon)
         choiceButton.setImage(image, for: .normal)
         checkSelectedCell()
@@ -118,15 +120,25 @@ final class FilterCell: UITableViewCell {
             choiceButton.bottomAnchor.constraint(equalTo: filterNameLabel.bottomAnchor, constant: -26),
             choiceButton.trailingAnchor.constraint(equalTo: filterNameLabel.trailingAnchor, constant: -16)
         ])
+    }*/
+    
+    private func configureChoiceImage() {
+        //let image = UIImage(resource: .checkIcon)
+        choiceImage.image = .checkIcon
+        checkSelectedCell()
+        choiceImage.translatesAutoresizingMaskIntoConstraints = false
+        //choiceButton.addTarget(self, action: #selector(didTapChoiceButton), for: .touchUpInside)
+        filterNameLabel.addSubview(choiceImage)
+        
+        NSLayoutConstraint.activate([
+            choiceImage.topAnchor.constraint(equalTo: filterNameLabel.topAnchor, constant: 25),
+            choiceImage.bottomAnchor.constraint(equalTo: filterNameLabel.bottomAnchor, constant: -26),
+            choiceImage.trailingAnchor.constraint(equalTo: filterNameLabel.trailingAnchor, constant: -16)
+        ])
     }
     
     private func checkSelectedCell() {
-        if isSelectedCell {
-            choiceButton.isEnabled = true
-            choiceButton.isHidden = false
-        } else {
-            choiceButton.isEnabled = false
-            choiceButton.isHidden = true
-        }
+        choiceImage.isHidden = isSelectedCell
+        choiceImage.isHidden = !isSelectedCell
     }
 }

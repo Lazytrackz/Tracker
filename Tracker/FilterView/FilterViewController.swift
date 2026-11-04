@@ -78,7 +78,7 @@ final class FilterViewController: UIViewController {
     
     private func configCell(for cell: FilterCell, with indexPath: IndexPath){
         guard let filterName = filterViewModel?.getFilterName(at: indexPath.row) else { return }
-        cell.delegate = self
+        //cell.delegate = self
         cell.setFilterText(filterName)
         let currentFilter = filterViewModel?.getCurrentFilter()
         if currentFilter == FilterType.completedTrackers.rawValue || currentFilter == FilterType.incompleteTrackers.rawValue {
@@ -125,6 +125,10 @@ extension FilterViewController: UITableViewDelegate {
         guard let filterCell = cell as? FilterCell else { return }
         deselectCell(tableView)
         filterCell.selectCell(true)
+        guard let filterName = selectedItem else { return }
+        filterViewModel?.setFilter(filterName)
+        delegate?.updateFilter(filterName)
+        self.dismiss(animated: true)
     }
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
@@ -134,7 +138,7 @@ extension FilterViewController: UITableViewDelegate {
     }
 }
 
-extension FilterViewController: FilterCellDelegate {
+/*extension FilterViewController: FilterCellDelegate {
     
     //MARK: - Methods
     
@@ -144,4 +148,4 @@ extension FilterViewController: FilterCellDelegate {
         delegate?.updateFilter(filterName)
         self.dismiss(animated: true)
     }
-}
+}*/

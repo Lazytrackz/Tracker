@@ -9,10 +9,6 @@ import AppMetricaCore
 
 //MARK: - AnalyticsConstants
 
-enum AnalyticsEvent: String {
-    case open, close, click
-}
-
 enum AnalyticsScreen: String {
     case main = "Main"
 }
@@ -22,11 +18,14 @@ enum AnalyticsItem: String {
     case track, filter, edit, delete
 }
 
+enum AnalyticsEvent: String {
+    case open, close, click
+}
+
 
 //MARK: - AnalyticsService
 
 final class AnalyticsService {
-    
     
     
     //MARK: - Properties
@@ -36,8 +35,11 @@ final class AnalyticsService {
         AppMetrica.activate(with: configuration)
     }
     
-    func reportEvent(event: String, params : [AnyHashable : Any]) {
-        AppMetrica.reportEvent(name: event, parameters: params, onFailure: { error in
+    func report(_ event: AnalyticsEvent, screen: AnalyticsScreen? = nil, item: AnalyticsItem? = nil) {
+        let screen = screen?.rawValue ?? ""
+        let item = item?.rawValue ?? ""
+        let parameters: [AnyHashable: Any] = ["screen" : screen, "item" : item]
+        AppMetrica.reportEvent(name: event.rawValue, parameters: parameters, onFailure: { error in
             print("REPORT ERROR: %@", error.localizedDescription)
         })
         print(event)
