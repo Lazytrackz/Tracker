@@ -31,11 +31,11 @@ final class ColorCollectionCell: UICollectionViewCell {
     //MARK: - Methods
     
     func setBorderLabelColorStatus(_ isSelected: Bool) {
-        borderLabel.layer.borderColor =  isSelected ? colorLabel.backgroundColor?.cgColor : UIColor.ypWhiteIOS.cgColor
+        borderLabel.layer.borderColor =  isSelected ? colorLabel.backgroundColor?.withAlphaComponent(0.3).cgColor : UIColor.ypWhiteIOS.withAlphaComponent(0.3).cgColor
     }
     
     func setNewCell(color: UIColor) {
-        borderLabel.layer.borderColor = UIColor.ypWhiteIOS.cgColor
+        borderLabel.layer.borderColor = UIColor.ypWhiteIOS.withAlphaComponent(0.3).cgColor
         borderLabel.layer.borderWidth = 3
         colorLabel.backgroundColor = color
     }
@@ -53,7 +53,7 @@ final class ColorCollectionCell: UICollectionViewCell {
         borderLabel.layer.cornerRadius = 8
         borderLabel.layer.masksToBounds = true
         borderLabel.layer.borderWidth = 3
-        borderLabel.layer.borderColor = UIColor.ypWhiteIOS.cgColor
+        borderLabel.layer.borderColor = UIColor.ypWhiteIOS.withAlphaComponent(0.3).cgColor
         borderLabel.backgroundColor = .ypWhiteIOS
         contentView.addSubview(borderLabel)
         

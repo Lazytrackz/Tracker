@@ -11,32 +11,15 @@ import UIKit
 // MARK: - TabBarController
 
 final class TabBarController: UITabBarController {
-    
-    // MARK: - Private properties
-    
-   
-
-   
-    
-  
+ 
     
     // MARK: - Lifecycle
     
-   
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-       
-        
         configureTabBarAppearance()
         configureViewControllers()
-        
-     
-        
-        //onboardingViewController.onboardingViewDelegate = self
-        
-       
-        
+        self.delegate = self
     }
     
     // MARK: - Private methods
@@ -49,20 +32,25 @@ final class TabBarController: UITabBarController {
         tabBar.standardAppearance = appearance
         tabBar.scrollEdgeAppearance = appearance
         tabBar.isTranslucent = false
-        tabBar.backgroundColor = .white
+        tabBar.backgroundColor = .ypWhiteIOS
+        let separator = UIView(frame: CGRect(x: 0, y: 0, width: tabBar.frame.width, height: 1))
+        separator.backgroundColor = .ypGrayIOS
+        tabBar.addSubview(separator)
     }
     
     private func configureViewControllers() {
         let trackerViewController = TrackersViewController()
         let statsViewController = StatsViewController()
+        let trackerViewTitleText = NSLocalizedString("tabbar_trackers", comment: "Text for trackerViewController.tabBarItem")
+        let statsViewTitleText = NSLocalizedString("tabbar_statistics", comment: "Text for statsViewController.tabBarItem")
         
         trackerViewController.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: trackerViewTitleText,
             image: UIImage(named: "Trackers"),
             selectedImage: nil
         )
         statsViewController.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: statsViewTitleText,
             image: UIImage(named: "Stats"),
             selectedImage: nil
         )
@@ -72,4 +60,11 @@ final class TabBarController: UITabBarController {
     }
 }
 
-
+extension TabBarController: UITabBarControllerDelegate {
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+    
+        if let selectedViewController = tabBarController.selectedViewController as? StatsViewController {
+            selectedViewController.updateData()
+        }
+    }
+}

@@ -17,7 +17,7 @@ final class DataBaseStore {
     static let shared = DataBaseStore()
     
     lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "TrackerData")
+        let container = NSPersistentContainer(name: CoreDataIdentifiers.coreDataBase)
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 assertionFailure("Unresolved error \(error), \(error.userInfo)")
@@ -25,6 +25,8 @@ final class DataBaseStore {
         })
         return container
     }()
+    
+    //MARK: - Methods
     
     func saveContext () {
         let context = persistentContainer.viewContext

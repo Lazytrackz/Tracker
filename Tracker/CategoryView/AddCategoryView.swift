@@ -22,7 +22,9 @@ final class AddCategoryView: UIViewController {
     private var categoryNameTextField = UITextField()
     private var categoryNameLabel = UILabel()
     private var isCategoryNameCreated = false
-    private var trackerCategoryStore: TrackerCategoryStore?
+    private var addCategoryViewModel = AddCategoryViewModel()
+    private var textFieldCharacterLimitLabel = UILabel()
+    private var isNewCategory = false
     
     //MARK: - Lifecycle
     
@@ -34,33 +36,52 @@ final class AddCategoryView: UIViewController {
     //MARK: - Actions
     
     @objc private func didTapDoneButton() {
-        trackerCategoryStore = TrackerCategoryStore()
         guard let categoryName = categoryNameTextField.text else { return }
-        trackerCategoryStore?.addCategory(categoryName)
+        isNewCategory ? addCategoryViewModel.addCategory(categoryName) : addCategoryViewModel.rewriteExistingCategory(categoryName)
         delegate?.updateCategoryView()
         self.dismiss(animated: true, completion: nil)
     }
     
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        guard let text = textField.text else { return }
+        let characterLimit = 38
+        if text.count > characterLimit{
+            textField.text = String(text.prefix(characterLimit))
+            textFieldCharacterLimitLabel.text = "Ограничение 38 символов"
+        }else {
+            textFieldCharacterLimitLabel.text = ""
+        }
+        text.isEmpty ? checkDoneButtonStatus(false) : checkDoneButtonStatus(true)
+    }
+    
+    //MARK: - Methods
+    
+    func setLoadingViewStatus(isNewCategory: Bool) {
+        self.isNewCategory = isNewCategory
+    }
+   
     //MARK: - Private Methods
     
     private func configureView() {
+        self.view.backgroundColor = .ypWhiteIOS
         configureTitleLabel()
         configureCategoryNameLabel()
+        configureCharacterLimitLabel()
         configureDoneButton()
     }
     
     private func configureTitleLabel() {
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textColor = UIColor(resource: .ypBlackIOS)
-        titleLabel.text = "Новая категория"
+        isNewCategory ? (titleLabel.text = "Новая категория") : (titleLabel.text = "Редактирование категории")
+        titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(titleLabel)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 38),
-            titleLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -678),
-            titleLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 120),
-            titleLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -119),
+            titleLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 78),
+            titleLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -76),
         ])
     }
     
@@ -79,10 +100,8 @@ final class AddCategoryView: UIViewController {
             categoryNameLabel.heightAnchor.constraint(equalToConstant: 75),
             categoryNameLabel.widthAnchor.constraint(equalToConstant: 343),
         ])
-        
         configureTextField()
     }
-    
     
     private func configureTextField() {
         categoryNameTextField.placeholder = "Введите название категории"
@@ -90,28 +109,49 @@ final class AddCategoryView: UIViewController {
         categoryNameTextField.isUserInteractionEnabled = true
         categoryNameTextField.translatesAutoresizingMaskIntoConstraints = false
         categoryNameTextField.resignFirstResponder()
+        categoryNameTextField.clearButtonMode = .whileEditing
         categoryNameTextField.delegate = self
+        categoryNameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        !isNewCategory ? categoryNameTextField.text = addCategoryViewModel.getCategoryName() : nil
         categoryNameLabel.addSubview(categoryNameTextField)
         
         NSLayoutConstraint.activate([
             categoryNameTextField.topAnchor.constraint(equalTo: categoryNameLabel.topAnchor, constant: 27),
             categoryNameTextField.bottomAnchor.constraint(equalTo: categoryNameLabel.bottomAnchor, constant: -26),
             categoryNameTextField.leadingAnchor.constraint(equalTo: categoryNameLabel.leadingAnchor, constant: 16),
+            categoryNameTextField.trailingAnchor.constraint(equalTo: categoryNameLabel.trailingAnchor, constant: -16)
         ])
     }
+    
+    private func configureCharacterLimitLabel() {
+        textFieldCharacterLimitLabel.translatesAutoresizingMaskIntoConstraints = false
+        textFieldCharacterLimitLabel.textColor = UIColor(resource: .ypRedIOS)
+        textFieldCharacterLimitLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        textFieldCharacterLimitLabel.text = ""
+        textFieldCharacterLimitLabel.textAlignment = .center
+        view.addSubview(textFieldCharacterLimitLabel)
+        
+        NSLayoutConstraint.activate([
+            textFieldCharacterLimitLabel.topAnchor.constraint(equalTo: categoryNameLabel.bottomAnchor, constant: 8),
+            textFieldCharacterLimitLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 28),
+            textFieldCharacterLimitLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -29)
+        ])
+    }
+    
+    
     
     private func configureDoneButton() {
         doneButton = UIButton(type: .roundedRect)
         doneButton.backgroundColor = .ypGrayIOS
         doneButton.setTitle("Готово", for: .normal)
-        doneButton.setTitleColor(.white, for: .normal)
+        doneButton.setTitleColor(.ypWhiteIOS, for: .normal)
         doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         doneButton.titleLabel?.textColor = UIColor(resource: .ypWhiteIOS)
         doneButton.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
         doneButton.layer.cornerRadius = 16
         doneButton.layer.masksToBounds = true
         doneButton.translatesAutoresizingMaskIntoConstraints = false
-        checkDoneButtonStatus()
+        isNewCategory ? checkDoneButtonStatus(false) : checkDoneButtonStatus(true)
         view.addSubview(doneButton)
         
         NSLayoutConstraint.activate([
@@ -123,7 +163,7 @@ final class AddCategoryView: UIViewController {
         ])
     }
     
-    private func checkDoneButtonStatus() {
+    private func checkDoneButtonStatus(_ isCategoryNameCreated: Bool) {
         doneButton.backgroundColor = isCategoryNameCreated ? .ypBlackIOS : .ypGrayIOS
         doneButton.isEnabled = isCategoryNameCreated
     }
@@ -136,23 +176,7 @@ extension AddCategoryView: UITextFieldDelegate {
     //MARK: - Methods
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        guard let text = textField.text else { return false }
-        if !text.isEmpty {
-            textField.resignFirstResponder()
-            isCategoryNameCreated = true
-            checkDoneButtonStatus()
-            return true
-        }else {
-            return false
-        }
-    }
-    
-    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        doneButton.isEnabled = false
-        return true
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        doneButton.isEnabled = true
+        textField.resignFirstResponder()
     }
 }
+

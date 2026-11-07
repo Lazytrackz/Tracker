@@ -7,8 +7,11 @@
 
 import Foundation
 
+//MARK: - CategoryCellDelegate
+
 protocol CategoryCellDelegate: AnyObject {
     
-    func didCloseCategoryView()
+    //MARK: - Methods
     
+    func didCloseCategoryView()
 }

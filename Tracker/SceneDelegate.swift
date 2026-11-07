@@ -10,12 +10,20 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
+ 
+    private func firstTimeLaunch() -> Bool {
+        if UserDefaults.standard.object(forKey: "isFirstTimeLaunch") == nil {
+            UserDefaults.standard.set(true, forKey: "isFirstTimeLaunch")
+            return true
+        }
+        return false
+    }
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+        guard let windowScene = scene as? UIWindowScene else { return }
         window = UIWindow(windowScene: windowScene)
-        //let viewController = TabBarController()
-        let viewController = OnboardingViewController()
+        let viewController = firstTimeLaunch() ?  OnboardingViewController() : TabBarController()
+        UserDefaults.standard.set("Все трекеры", forKey: "filterName")
         window?.rootViewController = viewController
         window?.makeKeyAndVisible()
     }
