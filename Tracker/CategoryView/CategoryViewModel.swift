@@ -22,15 +22,20 @@ final class CategoryViewModel {
     private var categories = [String]()
     private var category: String?
     private var categoriesModel: TrackerCategoryStore?
+    private var existingTrackerStore: ExistingTrackerStore?
+    private var categoryViewStore: CategoryViewStore?
+    private var categoryName: String?
     
     //MARK: - Init
     
     convenience init() {
-        self.init(categoriesModel: TrackerCategoryStore())
+        self.init(categoriesModel: TrackerCategoryStore(), existingTrackerStore: ExistingTrackerStore(), categoryViewStore: CategoryViewStore())
     }
     
-    init(categoriesModel: TrackerCategoryStore) {
+    init(categoriesModel: TrackerCategoryStore, existingTrackerStore: ExistingTrackerStore, categoryViewStore: CategoryViewStore) {
         self.categoriesModel = categoriesModel
+        self.existingTrackerStore = existingTrackerStore
+        self.categoryViewStore = categoryViewStore
     }
     
     //MARK: - Methods
@@ -40,6 +45,9 @@ final class CategoryViewModel {
             self?.categories = categories
             self?.onTasksUpdated?()
         }
+        categoryViewStore?.loadCategoryName(completion: { [weak self] categoryName in
+            self?.categoryName = categoryName
+        })
     }
     
     func getCategoriesCount() -> Int {
@@ -49,4 +57,17 @@ final class CategoryViewModel {
     func getCategoriesName(at index: Int) -> String {
         categories[index]
     }
+    
+    func deleteCategory (_ categoryName: String) {
+        categoriesModel?.deleteCategory(categoryName)
+    }
+    
+    func saveCategoryName(_ name: String) {
+        existingTrackerStore?.saveCategory(name)
+    }
+    
+    func getCategoryNameForView() -> String? {
+        categoryName
+    }
+    
 }

@@ -24,16 +24,18 @@ final class HabitViewModel {
     private var completedTrackerCount: Int?
     private var existingTrackerStore: ExistingTrackerStore?
     private var trackerStore: TrackerStore?
+    private var categoryViewStore: CategoryViewStore?
     
     //MARK: - Init
     
     convenience init() {
-        self.init(trackerStore: TrackerStore(), existingTrackerStore: ExistingTrackerStore())
+        self.init(trackerStore: TrackerStore(), existingTrackerStore: ExistingTrackerStore(), categoryViewStore: CategoryViewStore())
     }
     
-    init(trackerStore: TrackerStore, existingTrackerStore: ExistingTrackerStore) {
+    init(trackerStore: TrackerStore, existingTrackerStore: ExistingTrackerStore, categoryViewStore: CategoryViewStore) {
         self.trackerStore = trackerStore
         self.existingTrackerStore = existingTrackerStore
+        self.categoryViewStore = categoryViewStore
     }
     
     //MARK: - Methods
@@ -79,7 +81,6 @@ final class HabitViewModel {
     
     func rewriteExistingTracker(_ tracker: Tracker, _ categoryName: String) {
         guard let currentCategory = self.categoryName else { return }
-        
         do {
             try trackerStore?.rewriteData(tracker, categoryName, currentCategory)
         } catch {
@@ -87,7 +88,7 @@ final class HabitViewModel {
         }
     }
     
-    func deleteAllData() {
-        existingTrackerStore?.deleteAll()
+    func saveCategoryForView(_ categoryName: String) {
+        categoryViewStore?.setCategoryName(categoryName)
     }
 }

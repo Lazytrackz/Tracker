@@ -34,7 +34,6 @@ final class TrackersViewController: UIViewController {
     private var isCompletedTrackersIsOn = false
     private var isIncompleteTrackersIsOn = false
     private let analyticsService = AnalyticsService()
-    
     private var indexPath = IndexPath()
     
     //MARK: - Lifecycle
@@ -69,14 +68,13 @@ final class TrackersViewController: UIViewController {
         guard let habitViewController else { return }
         habitViewController.setLoadingViewStatus(isNewTracker: true)
         analyticsService.report(.click, screen: .main, item: .addTrack)
-        
         present(habitViewController, animated: true, completion: nil)
     }
     
     @objc private func searchTextDidChange(_ searchField: UISearchTextField) {
         guard let text = searchField.text else { return }
         isSearchFilterOn = trackerViewModel.filterData(by: text)
-        addTrackers()
+        updateView()
     }
     
     @objc private func didTapFilterButton() {
@@ -250,7 +248,7 @@ final class TrackersViewController: UIViewController {
     private func configureEmptyTrackerLabel() {
         emptyTrackerLabel.translatesAutoresizingMaskIntoConstraints = false
         emptyTrackerLabel.text = "Что будем отслеживать?"
-        emptyTrackerLabel.textColor = UIColor(named: "YP Black (iOS)")
+        emptyTrackerLabel.textColor = UIColor(resource: .ypBlackIOS)
         emptyTrackerLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         emptyTrackerLabel.textAlignment = .center
         view.addSubview(emptyTrackerLabel)
@@ -278,7 +276,7 @@ final class TrackersViewController: UIViewController {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         let titleText = NSLocalizedString("view_trackers", comment: "Text for label title")
         titleLabel.text = titleText
-        titleLabel.textColor = UIColor(named: "YP Black (iOS)")
+        titleLabel.textColor = UIColor(resource: .ypBlackIOS)
         titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
         view.addSubview(titleLabel)
         
@@ -371,7 +369,7 @@ extension TrackersViewController: UICollectionViewDelegate {
         cell.bounds.size.height = 90
         
         let configuration = UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { actions -> UIMenu? in
-            let editAction = UIAction(title: "Редактировать", identifier: nil) { _ in
+            let editAction = UIAction(title: AlertConstant.editAction, identifier: nil) { _ in
                 self.trackerViewModel.saveExistingTracker(tracker)
                 self.trackerViewModel.saveCategoryName(categoryName)
                 self.trackerViewModel.saveCompletedTrackerCount(completedTrackerCount)
@@ -382,26 +380,26 @@ extension TrackersViewController: UICollectionViewDelegate {
                 self.present(view, animated: true)
             }
             
-            let deleteAction = UIAction(title: "Удалить", identifier: nil) { _ in
+            let deleteAction = UIAction(title: AlertConstant.deleteAction, identifier: nil) { _ in
                 let alertController = UIAlertController(title: "",
-                                                        message: "Уверены что хотите удалить трекер?",
+                                                        message: AlertConstant.trackerMessage,
                                                         preferredStyle: .actionSheet)
                 self.analyticsService.report(.click, screen: .main, item: .delete)
                 
-                let confirmAction = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+                let confirmAction = UIAlertAction(title: AlertConstant.deleteAction, style: .destructive) { _ in
                     self.trackerViewModel.deleteTrackerRecord(tracker.id)
                     self.trackerViewModel.deleteTracker(tracker.id)
                     self.updateView()
                 }
                 
-                let cancelAction = UIAlertAction(title: "Отменить", style: .cancel) { _ in }
+                let cancelAction = UIAlertAction(title: AlertConstant.cancelAction, style: .cancel) { _ in }
                 alertController.addAction(confirmAction)
                 alertController.addAction(cancelAction)
                 self.present(alertController, animated: true)
             }
             
             let attributedTitle = NSAttributedString(
-                string: "Удалить",
+                string: AlertConstant.deleteAction,
                 attributes: [
                     .foregroundColor: UIColor(resource: .ypAlertColorIOS)
                 ]
@@ -411,20 +409,13 @@ extension TrackersViewController: UICollectionViewDelegate {
                           options: UIMenu.Options.displayInline,
                           children: [editAction, deleteAction])
         }
-        
         return configuration
     }
-    
-    
-  
-    
 }
 
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     
     //MARK: - Methods
-    
-    
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: 28)
@@ -501,11 +492,11 @@ extension TrackersViewController: UIScrollViewDelegate {
         let scrollContentSizeHeight = scrollView.contentSize.height
         let bottomInset = scrollView.contentInset.bottom
         let scrollViewBottomOffset = scrollContentSizeHeight + bottomInset - scrollViewHeight
-        
         if !collectionView.isHidden{
             if scrollView.contentOffset.y > scrollViewBottomOffset && scrollView.contentOffset.y != 0   {
                 filterButton.isHidden = true
-            }else {
+            }
+            if scrollView.contentOffset.y < 0   {
                 filterButton.isHidden = false
             }
         }

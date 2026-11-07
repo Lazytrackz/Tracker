@@ -59,6 +59,7 @@ final class TrackerRecordStore {
     
     func deleteTrackerRecord(_ trackerId: UInt) {
         let id = Int32(trackerId)
+        print(id)
         let fetchRequest = NSFetchRequest<TrackerRecordCoreData>(entityName: CoreDataIdentifiers.trackerRecordCoreData)
         fetchRequest.returnsObjectsAsFaults = false
         let predicate = NSPredicate(format: "%K CONTAINS %d", #keyPath(TrackerRecordCoreData.tracker.id), id)

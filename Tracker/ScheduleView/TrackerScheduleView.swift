@@ -81,7 +81,7 @@ final class TrackerScheduleView: UIViewController {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = UIFont.systemFont(ofSize: 16)
         titleLabel.text = "Расписание"
-        titleLabel.textColor = UIColor(named: "YP Black (iOS)")
+        titleLabel.textColor = UIColor(resource: .ypBlackIOS)
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         view.addSubview(titleLabel)
         

@@ -33,7 +33,7 @@ final class HabitViewController: UIViewController {
     private var isColorSelected: Bool = false
     private var scheduleArray = [WeekDays]()
     private var scheduleViewController: TrackerScheduleView?
-    private var categoryViewController =  CategoryViewController()
+    private var categoryViewController: CategoryViewController?
     private var trackerEmoji = String()
     private var trackerColor = UIColor()
     private var emojiTitleLabel = UILabel()
@@ -51,7 +51,7 @@ final class HabitViewController: UIViewController {
     private var scheduleLabel = UILabel()
     private var completedDaysLabel = UILabel()
     private var isNewTracker = false
-    
+    private var textFieldCharacterLimitLabel = UILabel()
     
     // MARK: - Lifecycle
     
@@ -76,9 +76,13 @@ final class HabitViewController: UIViewController {
     }
     
     @objc private func didTapCategoryButton() {
-        categoryViewController.delegate = self
+        categoryViewController = CategoryViewController()
+        categoryViewController?.delegate = self
+        if let categoryName = showCategoryLabel.text {
+            habitViewModel.saveCategoryForView(categoryName)
+        }
+        guard let categoryViewController else { return }
         present(categoryViewController, animated: true, completion: nil)
-        
     }
     
     @objc private func didTapScheduleButton() {
@@ -86,6 +90,19 @@ final class HabitViewController: UIViewController {
         guard let scheduleViewController else { return }
         scheduleViewController.delegate = self
         present(scheduleViewController, animated: true, completion: nil)
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        guard let text = textField.text else { return }
+        let characterLimit = 38
+        if text.count > characterLimit{
+            textField.text = String(text.prefix(characterLimit))
+            textFieldCharacterLimitLabel.text = "Ограничение 38 символов"
+        }else {
+            textFieldCharacterLimitLabel.text = ""
+        }
+        isTrackerNameCreated = !text.isEmpty ? true : false
+        checkCreateButtonStatus()
     }
     
     // MARK: - methods
@@ -102,6 +119,7 @@ final class HabitViewController: UIViewController {
         configureTitle("Новая привычка")
         configureTrackerNameLabel()
         configureTrackerNameTextField()
+        configureCharacterLimitLabel()
         configureCreateTrackerButton("Создать")
         configureCancelTrackerButton()
         configureScheduleButton()
@@ -120,6 +138,7 @@ final class HabitViewController: UIViewController {
         configureCompletedDaysLabel()
         configureTrackerNameLabel()
         configureTrackerNameTextField()
+        configureCharacterLimitLabel()
         configureCreateTrackerButton("Сохранить")
         configureCancelTrackerButton()
         configureScheduleButton()
@@ -129,7 +148,6 @@ final class HabitViewController: UIViewController {
         configureEmojiCollectionView()
         configureColorTitleLabel()
         configureColorCollectionView()
-        
         updateView()
         
     }
@@ -155,11 +173,9 @@ final class HabitViewController: UIViewController {
     private func setTracker(){
         guard let trackerName = habitViewModel.getTracker()?.name else { return }
         guard let schedule = habitViewModel.getTracker()?.schedule else { return }
-        
         trackerNameTextField.text = trackerName
         trackerTextFieldCompleted()
         showScheduleLabel(schedule)
-        
     }
     
     private func setCompletedTrackerCount(){
@@ -173,21 +189,45 @@ final class HabitViewController: UIViewController {
     
     private func showCategoryLabel(_ categoryName: String) {
         trackerCategoryName = categoryName
-        isCategoryChosen = true
-        checkCreateButtonStatus()
-        guard let trackerCategoryName else { return }
-        configureShowCategoryLabel(trackerCategoryName)
-        categoryButtonStackView.addArrangedSubview(showCategoryLabel)
+        if trackerCategoryName != nil {
+            isCategoryChosen = true
+            checkCreateButtonStatus()
+            guard let trackerCategoryName else { return }
+            configureShowCategoryLabel(trackerCategoryName)
+            categoryButtonStackView.addArrangedSubview(showCategoryLabel)
+        }else {
+            isCategoryChosen = false
+            checkCreateButtonStatus()
+            showCategoryLabel.text = ""
+            categoryButtonStackView.removeArrangedSubview(showCategoryLabel)
+        }
     }
+    
+    private func removeDeletedCategoryFromLabel(_ deletedCategory: String) {
+        if deletedCategory == showCategoryLabel.text {
+            isCategoryChosen = false
+            checkCreateButtonStatus()
+            showCategoryLabel.text = ""
+            categoryButtonStackView.removeArrangedSubview(showCategoryLabel)
+        }
+            
+    }
+        
     
     private func showScheduleLabel(_ scheduleArray: [WeekDays]) {
         self.scheduleArray = scheduleArray
-        isScheduleCreated = true
-        checkCreateButtonStatus()
+        print(self.scheduleArray)
         if !self.scheduleArray.isEmpty {
+            isScheduleCreated = true
+            checkCreateButtonStatus()
             let dayList = convertWeekDays(self.scheduleArray)
             configureShowScheduleLabel(dayList)
             scheduleButtonStackView.addArrangedSubview(scheduleLabel)
+        }else {
+            isScheduleCreated = false
+            checkCreateButtonStatus()
+            scheduleLabel.text = ""
+            scheduleButtonStackView.removeArrangedSubview(scheduleLabel)
         }
     }
     
@@ -392,7 +432,6 @@ final class HabitViewController: UIViewController {
         isColorSelected = false
         emojiCollectionView.reloadData()
         colorCollectionView.reloadData()
-        habitViewModel.deleteAllData()
     }
     
     private func checkCreateButtonStatus() {
@@ -416,7 +455,6 @@ final class HabitViewController: UIViewController {
         guard let trackerCategoryName else { return }
         habitViewModel.rewriteExistingTracker(tracker, trackerCategoryName)
     }
-    
     
     private func configureScheduleButtonStackView() {
         scheduleButtonStackView.addArrangedSubview(scheduleButtonLabel)
@@ -474,20 +512,40 @@ final class HabitViewController: UIViewController {
             ])
         }
     }
-    
-    private func configureTrackerNameTextField() {
+ 
+   private func configureTrackerNameTextField() {
         trackerNameTextField.placeholder = "Введите название трекера"
         trackerNameTextField.isEnabled = true
         trackerNameTextField.isUserInteractionEnabled = true
         trackerNameTextField.translatesAutoresizingMaskIntoConstraints = false
         trackerNameTextField.resignFirstResponder()
+        trackerNameTextField.textColor = UIColor(resource: .ypBlackIOS)
+        trackerNameTextField.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        trackerNameTextField.clearButtonMode = .whileEditing
         trackerNameTextField.delegate = self
+        trackerNameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         trackerNameLabel.addSubview(trackerNameTextField)
         
         NSLayoutConstraint.activate([
             trackerNameTextField.topAnchor.constraint(equalTo: trackerNameLabel.topAnchor, constant: 27),
             trackerNameTextField.bottomAnchor.constraint(equalTo: trackerNameLabel.bottomAnchor, constant: -26),
             trackerNameTextField.leadingAnchor.constraint(equalTo: trackerNameLabel.leadingAnchor, constant: 16),
+            trackerNameTextField.trailingAnchor.constraint(equalTo: trackerNameLabel.trailingAnchor, constant: -16)
+        ])
+    }
+    
+    private func configureCharacterLimitLabel() {
+        textFieldCharacterLimitLabel.translatesAutoresizingMaskIntoConstraints = false
+        textFieldCharacterLimitLabel.textColor = UIColor(resource: .ypRedIOS)
+        textFieldCharacterLimitLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        textFieldCharacterLimitLabel.text = ""
+        textFieldCharacterLimitLabel.textAlignment = .center
+        mainView.addSubview(textFieldCharacterLimitLabel)
+        
+        NSLayoutConstraint.activate([
+            textFieldCharacterLimitLabel.topAnchor.constraint(equalTo: trackerNameLabel.bottomAnchor, constant: 8),
+            textFieldCharacterLimitLabel.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 28),
+            textFieldCharacterLimitLabel.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -29)
         ])
     }
     
@@ -518,7 +576,7 @@ final class HabitViewController: UIViewController {
         NSLayoutConstraint.activate([
             stackView.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 16),
             stackView.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -16),
-            stackView.topAnchor.constraint(equalTo: trackerNameLabel.bottomAnchor, constant: 24),
+            stackView.topAnchor.constraint(equalTo: textFieldCharacterLimitLabel.bottomAnchor, constant: 32),
             stackView.heightAnchor.constraint(equalToConstant: 150),
             stackView.widthAnchor.constraint(equalToConstant: 343),
         ])
@@ -588,7 +646,6 @@ final class HabitViewController: UIViewController {
         cancelTrackerButton.setTitle("Отменить", for: .normal)
         cancelTrackerButton.setTitleColor(.ypRedIOS, for: .normal)
         cancelTrackerButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        //cancelTrackerButton.titleLabel?.textColor = UIColor(resource: .ypRedIOS)
         cancelTrackerButton.addTarget(self, action: #selector(didTapCancelButton), for: .touchUpInside)
         cancelTrackerButton.layer.cornerRadius = 16
         cancelTrackerButton.layer.masksToBounds = true
@@ -656,25 +713,29 @@ final class HabitViewController: UIViewController {
             weekDayNumbers[$0] ?? 7 < weekDayNumbers[$1] ?? 7
         })
         
-        for day in sortedDays{
-            switch day {
-            case .monday:
-                convertedDays.append("Пн, ")
-            case .tuesday:
-                convertedDays.append("Вт, ")
-            case .wednesday:
-                convertedDays.append("Ср, ")
-            case .thursday:
-                convertedDays.append("Чт, ")
-            case .friday:
-                convertedDays.append("Пт, ")
-            case .saturday:
-                convertedDays.append("Cб, ")
-            case .sunday:
-                convertedDays.append("Вс, ")
+        if sortedDays.count < 7 {
+            for day in sortedDays{
+                switch day {
+                case .monday:
+                    convertedDays.append("Пн, ")
+                case .tuesday:
+                    convertedDays.append("Вт, ")
+                case .wednesday:
+                    convertedDays.append("Ср, ")
+                case .thursday:
+                    convertedDays.append("Чт, ")
+                case .friday:
+                    convertedDays.append("Пт, ")
+                case .saturday:
+                    convertedDays.append("Cб, ")
+                case .sunday:
+                    convertedDays.append("Вс, ")
+                }
             }
+            convertedDays.removeLast(2)
+        }else {
+            convertedDays = "Каждый день"
         }
-        convertedDays.removeLast(2)
         return convertedDays
     }
 }
@@ -686,7 +747,7 @@ extension HabitViewController: ScheduleViewDelegate {
     //MARK: - Methods
     
     func scheduleViewDoneButtonDidTap(scheduleArray: [WeekDays]) {
-        showScheduleLabel(scheduleArray)
+         showScheduleLabel(scheduleArray)
     }
 }
 
@@ -696,21 +757,6 @@ extension HabitViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-        trackerTextFieldCompleted()
-        return true
-    }
-    
-    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        cancelTrackerButton.isEnabled = false
-        scheduleButton.isEnabled = false
-        categoryButton.isEnabled = false
-        return true
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        cancelTrackerButton.isEnabled = true
-        scheduleButton.isEnabled = true
-        categoryButton.isEnabled = true
     }
 }
 
@@ -801,10 +847,17 @@ extension HabitViewController: UICollectionViewDelegate {
 }
 
 extension HabitViewController: CategoryViewControllerDelegate {
-    
+  
     //MARK: - Methods
     
     func setCategory(_ categoryName: String) {
         showCategoryLabel(categoryName)
     }
+    
+    func setDeletedCategory(_ deletedCategory: String) {
+        removeDeletedCategoryFromLabel(deletedCategory)
+    }
+    
+
+
 }

@@ -91,11 +91,4 @@ class ExistingTrackerStore {
         let result = userDefaults.integer(forKey: UserDefaultsIdentifiers.completedTrackerCountKey)
         completion(result)
     }
-    
-    func deleteAll() {
-        let bundleID = Bundle.main.bundleIdentifier
-        guard let bundleID else { return }
-        print("delete all")
-        userDefaults.removePersistentDomain(forName: bundleID)
-    }
 }

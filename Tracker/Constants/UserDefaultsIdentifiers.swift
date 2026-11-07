@@ -18,5 +18,6 @@ enum UserDefaultsIdentifiers {
     static let trackerEmojiKey = "emoji"
     static let trackerScheduleKey = "schedule"
     static let filterNameKey = "filterName"
+    static let categoryNameForViewKey = "categoryNameForView"
     
 }

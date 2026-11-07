@@ -14,4 +14,5 @@ protocol CategoryViewControllerDelegate: AnyObject {
     //MARK: - Methods
     
     func setCategory(_ categoryName: String)
+    func setDeletedCategory(_ deletedCategory: String)
 }

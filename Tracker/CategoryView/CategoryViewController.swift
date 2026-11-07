@@ -47,6 +47,7 @@ final class CategoryViewController: UIViewController {
         addCategoryView = AddCategoryView()
         addCategoryView?.delegate = self
         guard let addCategoryView else { return }
+        addCategoryView.setLoadingViewStatus(isNewCategory: true)
         present(addCategoryView, animated: true)
     }
     
@@ -169,9 +170,9 @@ final class CategoryViewController: UIViewController {
     
     private func configCell(for cell: CategoryCell, with indexPath: IndexPath){
         guard let categoryName = categoryViewModel?.getCategoriesName(at: indexPath.row) else { return }
-        //cell.delegate = self
-        cell.selectCell(false)
         cell.setCategoryText(categoryName)
+        let currentCategory = categoryViewModel?.getCategoryNameForView()
+        categoryName == currentCategory ? cell.selectCell(true) : cell.selectCell(false)
     }
 }
 
@@ -183,6 +184,53 @@ extension CategoryViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath, cell: CategoryCell) -> CGFloat {
         return 75
+    }
+    
+    func tableView(_ tableView: UITableView,
+                   contextMenuConfigurationForRowAt indexPath: IndexPath,
+                   point: CGPoint) -> UIContextMenuConfiguration? {
+       
+        guard let categoryName = categoryViewModel?.getCategoriesName(at: indexPath.row) else { return nil}
+    
+        let configuration = UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { actions -> UIMenu? in
+            let editAction = UIAction(title: AlertConstant.editAction, identifier: nil) { _ in
+                self.addCategoryView = AddCategoryView()
+                self.categoryViewModel?.saveCategoryName(categoryName)
+                self.addCategoryView?.setLoadingViewStatus(isNewCategory: false)
+                self.addCategoryView?.delegate = self
+                guard let view = self.addCategoryView else { return }
+                self.present(view, animated: true)
+            }
+            
+            let deleteAction = UIAction(title: AlertConstant.deleteAction, identifier: nil) { _ in
+                let alertController = UIAlertController(title: "",
+                                                        message: AlertConstant.categoryMessage,
+                                                        preferredStyle: .actionSheet)
+           
+                let confirmAction = UIAlertAction(title: AlertConstant.deleteAction, style: .destructive) { _ in
+                    self.categoryViewModel?.deleteCategory(categoryName)
+                    self.delegate?.setDeletedCategory(categoryName)
+                    self.updateData()
+                }
+                
+                let cancelAction = UIAlertAction(title: AlertConstant.cancelAction, style: .cancel) { _ in }
+                alertController.addAction(confirmAction)
+                alertController.addAction(cancelAction)
+                self.present(alertController, animated: true)
+            }
+            
+            let attributedTitle = NSAttributedString(
+                string: AlertConstant.deleteAction,
+                attributes: [
+                    .foregroundColor: UIColor(resource: .ypAlertColorIOS)
+                ]
+            )
+            deleteAction.setValue(attributedTitle, forKey: "attributedTitle")
+            return UIMenu(image: nil, identifier: nil,
+                          options: UIMenu.Options.displayInline,
+                          children: [editAction, deleteAction])
+        }
+        return configuration
     }
 }
 
@@ -231,14 +279,3 @@ extension CategoryViewController: AddCategoryViewDelegate {
         updateData()
     }
 }
-
-/*extension CategoryViewController: CategoryCellDelegate {
-    
-    //MARK: - Methods
-    
-    func didCloseCategoryView() {
-        guard let categoryName = selectedItem else { return }
-        delegate?.setCategory(categoryName)
-        self.dismiss(animated: true)
-    }
-}*/

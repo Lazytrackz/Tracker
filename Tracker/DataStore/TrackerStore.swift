@@ -38,9 +38,8 @@ final class TrackerStore {
     
     func rewriteData(_ tracker: Tracker, _ trackerCategoryName: String, _ currentCategoryName: String) throws {
         let id = Int32(tracker.id)
-        guard let oldTrackerCategoryCoreData = findCategory(currentCategoryName) else { return }
-        guard let newTrackerCategoryCoreData = findCategory(trackerCategoryName) else { return }
-        
+        let oldTrackerCategoryCoreData = findCategory(currentCategoryName)
+        let newTrackerCategoryCoreData = findCategory(trackerCategoryName)
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: CoreDataIdentifiers.trackerCoreData)
         fetchRequest.returnsObjectsAsFaults = false
         let predicate = NSPredicate(format: "id == %d", id)
@@ -52,9 +51,17 @@ final class TrackerStore {
             trackerCoreData.color = tracker.color
             trackerCoreData.emoji = tracker.emoji
             trackerCoreData.schedule = tracker.schedule as NSObject
-            trackerCoreData.removeFromCategory(oldTrackerCategoryCoreData)
-            trackerCoreData.addToCategory(newTrackerCategoryCoreData)
-            DataBaseStore.shared.saveContext()
+            if let oldCategory = oldTrackerCategoryCoreData {
+                trackerCoreData.removeFromCategory(oldCategory)
+            }else {
+                print("Old category not found")
+            }
+            if let newCategory = newTrackerCategoryCoreData {
+                trackerCoreData.addToCategory(newCategory)
+                DataBaseStore.shared.saveContext()
+            }else {
+                print("New category not found")
+            }
         }else{
             print("Tracker not found")
         }
@@ -88,13 +95,12 @@ final class TrackerStore {
         guard let results else { return nil }
         
         if !results.isEmpty {
-            guard let result = results.first else { return TrackerCategoryCoreData(context: context) }
+            guard let result = results.first else { return TrackerCategoryCoreData(context: context)
+            }
             trackerCategoryCoreData = result
         }else {
-            trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
-            trackerCategoryCoreData?.name = trackerCategoryName
+            print("Category not found")
         }
-        guard let trackerCategoryCoreData else { return nil }
         return trackerCategoryCoreData
     }
     

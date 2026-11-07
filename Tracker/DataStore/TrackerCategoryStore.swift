@@ -194,6 +194,38 @@ final class TrackerCategoryStore: NSObject {
             return true
         }
     }
+    
+    func deleteCategory(_ categoryName: String) {
+        let fetchRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: CoreDataIdentifiers.trackerCategoryCoreData)
+        fetchRequest.returnsObjectsAsFaults = false
+        let predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCategoryCoreData.name), categoryName)
+        fetchRequest.predicate = predicate
+        guard let results = try? context.fetch(fetchRequest) else { return }
+        
+        if let categoryCoreData = results.first {
+            let trackersSet = categoryCoreData.value(forKey: "trackers") as? Set<TrackerCoreData> ?? []
+            trackersSet.forEach({trackerRecords.deleteTrackerRecord(UInt($0.id))})
+            context.delete(categoryCoreData)
+            DataBaseStore.shared.saveContext()
+        }else{
+            print("Category not found")
+        }
+    }
+    
+    func rewriteData( _ trackerCategoryName: String, _ currentCategoryName: String) throws {
+        let fetchRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: CoreDataIdentifiers.trackerCategoryCoreData)
+        fetchRequest.returnsObjectsAsFaults = false
+        let predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCategoryCoreData.name), currentCategoryName)
+        fetchRequest.predicate = predicate
+        let results = try? context.fetch(fetchRequest)
+        if let categoryCoreData = results?.first {
+            categoryCoreData.name = trackerCategoryName
+            DataBaseStore.shared.saveContext()
+        }else{
+            print("Category not found")
+        }
+    }
+    
 }
 
 //MARK: - Extension

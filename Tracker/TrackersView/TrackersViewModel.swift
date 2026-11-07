@@ -72,9 +72,16 @@ final class TrackersViewModel {
     
     func filterData(by searchedText: String) -> Bool {
         if !searchedText.isEmpty {
-            filteredCategories = categories.filter  {$0.trackers.contains(where: {$0.name?.lowercased() == searchedText.lowercased()})}
-            return true
+            var categories = [TrackerCategory]()
+            for category in self.categories {
+                let tracker = category.trackers.filter {$0.name?.lowercased().contains(searchedText.lowercased()) ?? false}
+                if !tracker.isEmpty {
+                    categories.append(TrackerCategory(name: category.name, trackers: tracker))
+                }
+            }
+            filteredCategories = categories
             
+            return true
         }else {
             updateCollection()
         }
@@ -126,7 +133,7 @@ final class TrackersViewModel {
     }
     
     func getTrackersCount(at section: Int) -> Int {
-        filteredCategories[section].trackers.count
+        return filteredCategories[section].trackers.count
     }
     
     func getCategory(at sectionIndex: Int) -> String {

@@ -11,16 +11,11 @@ import UIKit
 
 final class CategoryCell: UITableViewCell {
     
-    //MARK: - Delegate
-    
-    //weak var delegate: CategoryCellDelegate?
-    
     //MARK: - Private properties
     
     private var categoryViewMode = CategoryViewModel()
     private var categoryNameLabel = UILabel()
     private var categoryNameTextField = UILabel()
-    //private var choiceButton = UIButton()
     private var choiceImage = UIImageView()
     private var isSelectedCell = false
     
@@ -40,10 +35,6 @@ final class CategoryCell: UITableViewCell {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         nil
-    }
-    
-    @objc private func didTapChoiceButton() {
-       // delegate?.didCloseCategoryView()
     }
     
     //MARK: - Methods
@@ -86,7 +77,6 @@ final class CategoryCell: UITableViewCell {
         
         configureTextField()
         configureChoiceImage()
-        //configureChoiceButton()
     }
     
     private func configureTextField() {
@@ -100,27 +90,10 @@ final class CategoryCell: UITableViewCell {
         ])
     }
     
-    /*private func configureChoiceButton() {
-        let image = UIImage(resource: .checkIcon)
-        choiceButton.setImage(image, for: .normal)
-        checkSelectedCell()
-        choiceButton.translatesAutoresizingMaskIntoConstraints = false
-        choiceButton.addTarget(self, action: #selector(didTapChoiceButton), for: .touchUpInside)
-        categoryNameLabel.addSubview(choiceButton)
-        
-        NSLayoutConstraint.activate([
-            choiceButton.topAnchor.constraint(equalTo: categoryNameLabel.topAnchor, constant: 25),
-            choiceButton.bottomAnchor.constraint(equalTo: categoryNameLabel.bottomAnchor, constant: -26),
-            choiceButton.trailingAnchor.constraint(equalTo: categoryNameLabel.trailingAnchor, constant: -16)
-        ])
-    }*/
-    
     private func configureChoiceImage() {
-        //let image = UIImage(resource: .checkIcon)
         choiceImage.image = .checkIcon
         checkSelectedCell()
         choiceImage.translatesAutoresizingMaskIntoConstraints = false
-        //choiceButton.addTarget(self, action: #selector(didTapChoiceButton), for: .touchUpInside)
         categoryNameLabel.addSubview(choiceImage)
         
         NSLayoutConstraint.activate([
@@ -129,12 +102,6 @@ final class CategoryCell: UITableViewCell {
             choiceImage.trailingAnchor.constraint(equalTo: categoryNameLabel.trailingAnchor, constant: -16)
         ])
     }
-    
-    
-   /* private func checkSelectedCell() {
-        choiceButton.isEnabled = isSelectedCell
-        choiceButton.isHidden = !isSelectedCell
-    }*/
     
     private func checkSelectedCell() {
         choiceImage.isHidden = isSelectedCell

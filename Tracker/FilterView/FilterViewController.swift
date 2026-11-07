@@ -78,7 +78,6 @@ final class FilterViewController: UIViewController {
     
     private func configCell(for cell: FilterCell, with indexPath: IndexPath){
         guard let filterName = filterViewModel?.getFilterName(at: indexPath.row) else { return }
-        //cell.delegate = self
         cell.setFilterText(filterName)
         let currentFilter = filterViewModel?.getCurrentFilter()
         if currentFilter == FilterType.completedTrackers.rawValue || currentFilter == FilterType.incompleteTrackers.rawValue {
@@ -137,15 +136,3 @@ extension FilterViewController: UITableViewDelegate {
         filterCell.selectCell(false)
     }
 }
-
-/*extension FilterViewController: FilterCellDelegate {
-    
-    //MARK: - Methods
-    
-    func didCloseFilterView() {
-        guard let filterName = selectedItem else { return }
-        filterViewModel?.setFilter(filterName)
-        delegate?.updateFilter(filterName)
-        self.dismiss(animated: true)
-    }
-}*/
